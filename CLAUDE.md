@@ -49,11 +49,11 @@ chess_game/
 
 **`src/index.css`** — Tailwind entry point. Contains:
 - `@import "tailwindcss"` + shadcn imports
-- `@theme inline { ... }` with custom tokens: board square colors (`sq-light`, `sq-dark`, etc.), accent gold, font families (`font-display`, `font-body`), custom animations (`check-throb`, `dots-pulse`)
-- `:root` CSS variables for the dark glassmorphism color scheme
+- `@theme inline { ... }` with custom tokens: board square colors (`sq-light`, `sq-dark`, etc.), accent gold, font families (`font-display`, `font-body`, `font-ocr`), custom animations (`check-throb`, `dots-pulse`)
+- `:root` CSS variables for the dark color scheme (black background)
 - `@keyframes` for check-throb and dots-pulse animations
 
-**Board.css** is the only remaining custom CSS file (~48 lines), used for things Tailwind can't express: 3D perspective transforms, `::after` pseudo-elements, CSS custom property `--board-size` with responsive media query overrides.
+**Board.css** is the only remaining custom CSS file (~30 lines), used for things Tailwind can't express: CSS custom property `--board-size` with responsive media query overrides, grid layout for the board.
 
 ---
 
@@ -127,15 +127,15 @@ AI RESPONSE (useEffect on gameState.turn === BLACK):
 
 ### Visual architecture
 
-The visual theme is **dark glassmorphism** — frosted glass cards, backdrop blur, semi-transparent layers, and a deep navy radial-gradient background.
+The visual theme is **dark minimal** — semi-transparent cards, a black background with a subtle radial gradient (dark gray centered on the board, fading to black).
 
-The board uses **CSS 3D perspective** (`perspective(1200px) rotateX(22deg)` as a transform function, not a rendering context) to create a tabletop viewing angle. A `::after` pseudo-element on the board wrapper renders a visible front edge. A blurred radial-gradient div beneath simulates a table shadow. The board frame uses glassmorphism styling (`bg-white/[0.06] backdrop-blur-sm border border-white/10`).
+The board is **flat 2D** — no perspective tilt or 3D transforms. The board frame uses a subtle border (`bg-white/[0.06] border border-white/10`).
 
-Board squares use blue-gray tones (`bg-sq-light` #8a9bb4 / `bg-sq-dark` #4a5568) defined as Tailwind theme tokens. Selection, last-move, and check highlights are applied via conditional Tailwind classes with `cn()`.
+Board squares use **black and gray tones** (`bg-sq-light` #a0a0a0 / `bg-sq-dark` #2a2a2a) defined as Tailwind theme tokens. Selection, last-move, and check highlights are applied via conditional Tailwind classes with `cn()`. Board coordinate labels (ranks/files) use `font-ocr` (Share Tech Mono) at 12px with `text-white/70` for clear visibility.
 
 Pieces use the **cburnett SVG set** (`src/assets/pieces/`), the standard piece artwork from lichess.org (CC BY-SA 3.0 by Colin M.L. Burnett). `PieceSVG.jsx` imports all 12 SVGs and renders them as `<img>` elements. Tailwind `drop-shadow` utilities on the piece wrapper cast shadows onto the board.
 
-The info panel uses shadcn **Card** with glassmorphism (`bg-white/[0.05] backdrop-blur-xl border-white/10`), Cinzel serif headings via `font-display`, and gold accent color for the title. The promotion modal uses shadcn **Dialog** for accessible overlay with focus trapping.
+The info panel uses shadcn **Card** with glassmorphism (`bg-white/[0.05] backdrop-blur-xl border-white/10`), **Share Tech Mono** (`font-ocr`) for all text, and gold accent color for the title. The promotion modal uses shadcn **Dialog** for accessible overlay with focus trapping.
 
 ---
 

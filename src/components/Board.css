@@ -1,24 +1,6 @@
-/* 3D scene padding */
+/* board scene padding */
 .board-scene {
-  padding: 20px 20px 60px;
-}
-
-/* tilted board — perspective as a transform function (no 3D rendering context) */
-.board-3d {
-  transform: perspective(1200px) rotateX(22deg);
-}
-
-/* front-edge pseudo-element (board thickness) */
-.board-3d::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  height: 14px;
-  background: linear-gradient(to bottom, #1e2636 0%, #141a26 30%, #0b0e14 100%);
-  border-radius: 0 0 4px 4px;
-  pointer-events: none;
+  padding: 20px;
 }
 
 /* 8x8 grid with responsive sizing */
@@ -42,7 +24,6 @@
 }
 
 @media (max-width: 900px) {
-  .board-scene { padding: 10px 10px 40px; }
-  .board-3d { transform: perspective(1200px) rotateX(16deg); }
+  .board-scene { padding: 10px; }
   .board { --board-size: min(70vh, 88vw); }
 }

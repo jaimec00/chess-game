@@ -45,11 +45,11 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* chess board square colors */
-  --color-sq-light: #8a9bb4;
-  --color-sq-dark: #4a5568;
+  --color-sq-light: #a0a0a0;
+  --color-sq-dark: #2a2a2a;
   --color-sq-selected: #6b9e3a;
-  --color-sq-lastmove-light: #7a8fa8;
-  --color-sq-lastmove-dark: #3d5a80;
+  --color-sq-lastmove-light: #8a8a8a;
+  --color-sq-lastmove-dark: #3a3a3a;
   --color-sq-check: #c02800;
 
   /* accent gold */
@@ -59,6 +59,7 @@
   /* fonts */
   --font-display: "Cinzel", Georgia, serif;
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-ocr: "Share Tech Mono", "Courier New", monospace;
 
   /* custom animations */
   --animate-check-throb: check-throb 1.2s ease-in-out infinite;
@@ -67,7 +68,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: #0b0e14;
+  --background: #000000;
   --foreground: #e0e4ec;
   --card: rgba(255, 255, 255, 0.05);
   --card-foreground: #d4c8b0;
