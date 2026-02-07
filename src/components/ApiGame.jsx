@@ -7,7 +7,7 @@ import ApiKeyInput from './ApiKeyInput.jsx';
 import { WHITE, BLACK } from '../engine/constants.js';
 import { getLegalMoves } from '../engine/moves.js';
 import { createInitialGameState, makeMove } from '../engine/gameState.js';
-import { moveToSAN, sanToMove, moveHistoryToString } from '../engine/notation.js';
+import { moveToSAN, sanToMove, moveHistoryToString, boardToDescription } from '../engine/notation.js';
 import { getProvider, getDefaultModel, PROVIDERS } from '../services/llm/provider.js';
 import { getApiKey, setApiKey, clearApiKey } from '../services/llm/apiKeyStore.js';
 import { SYSTEM_PROMPT, buildUserMoveMessage, buildFirstMoveMessage, buildIllegalMoveMessage, parseLLMResponse } from '../services/llm/prompt.js';
@@ -71,11 +71,12 @@ export default function ApiGame() {
         const history = moveHistoryToString(gameState);
         const lastMoveSAN = history.split(/\s+/).filter(s => !s.includes('.')).pop() || '';
 
+        const boardState = boardToDescription(gameState);
         let userMsg;
         if (gameState.moveHistory.length === 1) {
-          userMsg = buildFirstMoveMessage(lastMoveSAN);
+          userMsg = buildFirstMoveMessage(lastMoveSAN, boardState);
         } else {
-          userMsg = buildUserMoveMessage(lastMoveSAN);
+          userMsg = buildUserMoveMessage(lastMoveSAN, boardState);
         }
 
         // Add player move to chat

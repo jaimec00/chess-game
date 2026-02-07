@@ -103,9 +103,9 @@ Supports the API game mode where an LLM plays as black. No new npm dependencies 
 **`provider.js`** — Provider registry with a `PROVIDERS` map. Currently contains only Anthropic with two models (Haiku 4.5 default, Sonnet 4.5). Each provider has a `sendMessage(apiKey, model, messages, systemPrompt)` async function. The Anthropic implementation calls `fetch('https://api.anthropic.com/v1/messages')` directly from the browser using the `anthropic-dangerous-direct-browser-access: true` header (official CORS pattern). Max tokens: 300. Adding a new provider is just adding another entry to the `PROVIDERS` object.
 
 **`prompt.js`** — System prompt and message construction for the LLM chess opponent:
-- `SYSTEM_PROMPT` — instructs the LLM to play as black, respond with SAN on line 1 + comment on line 3, includes SAN notation rules and examples
-- `buildUserMoveMessage(san)` — constructs a user message with only the player's move (e.g. "My move: e4")
-- `buildFirstMoveMessage(san)` — special message for the game's first move with the player's opening move
+- `SYSTEM_PROMPT` — instructs the LLM to play as black, respond with SAN on line 1 + comment on line 3, includes SAN notation rules, examples, and board state format description
+- `buildUserMoveMessage(san, boardDescription)` — constructs a user message with the player's move and current board state
+- `buildFirstMoveMessage(san, boardDescription)` — special message for the game's first move with the player's opening move and board state
 - `buildIllegalMoveMessage(attempted)` — simple feedback that the move was illegal, asks for a different one
 - `parseLLMResponse(text)` → `{move, comment}` — extracts the move from line 1 and comment from after the first blank line
 
@@ -148,7 +148,8 @@ Same board click handling as Game.jsx (select piece → execute move)
 LLM RESPONSE (useEffect on gameState.turn === BLACK && apiKey set):
   → setIsThinking(true) → "Thinking..." shown in chat
   → Convert player's last move to SAN via moveHistoryToString()
-  → Build user message with just the move (no board state or history)
+  → Generate current board state via boardToDescription()
+  → Build user message with the move + current board state (not repeated from prior turns)
   → Add player move to chatMessages
   → Append user message to conversationHistory
   → Call provider.sendMessage() with full conversation
