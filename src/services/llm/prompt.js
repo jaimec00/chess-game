@@ -1,6 +1,5 @@
-import { boardToDescription, moveHistoryToString, toSquareName } from '../../engine/notation.js';
+import { boardToDescription, moveHistoryToString, moveToSAN } from '../../engine/notation.js';
 import { getAllLegalMoves } from '../../engine/moves.js';
-import { moveToSAN } from '../../engine/notation.js';
 
 export const SYSTEM_PROMPT = `You are playing chess as Black against a human player. You are a confident, witty opponent who provides brief commentary on each move.
 
@@ -45,7 +44,7 @@ export function buildUserMoveMessage(san, gameState) {
 
 export function buildFirstMoveMessage(gameState) {
   const boardDesc = boardToDescription(gameState);
-  return `The game just started. The board is in the initial position:\n${boardDesc}\n\nI'm White, you're Black. My first move was already made — the position above reflects it. Your turn.`;
+  return `The game just started. Here is the current position after White's first move:\n${boardDesc}\n\nI'm White, you're Black. Your turn.`;
 }
 
 export function buildIllegalMoveMessage(attempted, gameState) {

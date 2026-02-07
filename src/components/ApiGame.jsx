@@ -5,7 +5,7 @@ import ChatBox from './ChatBox.jsx';
 import ProviderSelect from './ProviderSelect.jsx';
 import ApiKeyInput from './ApiKeyInput.jsx';
 import { WHITE, BLACK } from '../engine/constants.js';
-import { getLegalMoves, getAllLegalMoves } from '../engine/moves.js';
+import { getLegalMoves } from '../engine/moves.js';
 import { createInitialGameState, makeMove } from '../engine/gameState.js';
 import { moveToSAN, sanToMove, boardToDescription, moveHistoryToString } from '../engine/notation.js';
 import { getProvider, getDefaultModel, PROVIDERS } from '../services/llm/provider.js';
@@ -26,7 +26,7 @@ export default function ApiGame() {
   const [modelId, setModelId] = useState(() => getDefaultModel('anthropic')?.id || '');
   const [apiKey, setApiKeyState] = useState(() => getApiKey('anthropic'));
   const [chatMessages, setChatMessages] = useState([]);
-  const [conversationHistory, setConversationHistory] = useState([]);
+  const conversationHistoryRef = useRef([]);
   const [viewMode, setViewMode] = useState('commentary');
   const [apiError, setApiError] = useState(null);
 
@@ -67,11 +67,7 @@ export default function ApiGame() {
 
     const runLLMTurn = async () => {
       try {
-        // Build the user message from the player's last move
-        const lastMove = gameState.moveHistory[gameState.moveHistory.length - 1];
-
-        // We need to get the SAN of the player's last move from the *previous* state.
-        // Since we can't easily get the previous state, reconstruct the SAN from move history.
+        // Reconstruct the SAN of the player's last move from the full move history
         const history = moveHistoryToString(gameState);
         const lastMoveSAN = history.split(/\s+/).filter(s => !s.includes('.')).pop() || '';
 
@@ -93,7 +89,7 @@ export default function ApiGame() {
 
         // Build conversation messages
         const newConvHistory = [
-          ...conversationHistory,
+          ...conversationHistoryRef.current,
           { role: 'user', content: userMsg },
         ];
 
@@ -127,7 +123,7 @@ export default function ApiGame() {
 
             // Update conversation history with the successful response
             const finalConv = [...currentConv, { role: 'assistant', content: responseText }];
-            setConversationHistory(finalConv);
+            conversationHistoryRef.current = finalConv;
 
             // Add LLM move to chat
             setChatMessages(prev => [
@@ -155,7 +151,7 @@ export default function ApiGame() {
             ...prev,
             { role: 'system', type: 'error', content: `Failed to get a legal move after ${MAX_RETRIES} attempts. Try making another move or start a new game.` },
           ]);
-          setConversationHistory(currentConv);
+          conversationHistoryRef.current = currentConv;
         }
       } catch (err) {
         const errorMsg = err.message || 'Unknown error';
@@ -242,7 +238,7 @@ export default function ApiGame() {
     setIsThinking(false);
     setPendingPromotion(null);
     setChatMessages([]);
-    setConversationHistory([]);
+    conversationHistoryRef.current = [];
     setApiError(null);
     llmTurnRef.current = false;
   }, []);
