@@ -159,10 +159,10 @@ node_modules/.bin/vite          # dev server
 ### Git & GitHub preferences
 
 - **Branches**: use prefixed names — `feature/…`, `fix/…`, `refactor/…`, etc.
-- **Commits**: short lowercase messages (e.g. `add move timer`, `fix castling bug`).
+- **Commits**: short lowercase messages (e.g. `add move timer`, `fix castling bug`). For larger PRs, commit incrementally as you work — don't bundle everything into one or two giant commits. Small PRs with only a few logical changes are fine with fewer commits. Use your best judgement.
 - **Commit & push freely** — no need to ask before committing or pushing.
 - **Feature branches + PRs** — create a branch per feature/fix and open a PR to merge into `master`. Don't commit directly to `master` for new work. This applies to **all** changes — code, docs, config, CLAUDE.md updates, everything. No exceptions.
-- **Git worktrees** — never work on `master` directly. Use `git worktree add` to create a worktree for each branch, do all work there, then commit, push, and open a PR with `gh pr create`. Remove the worktree after the PR is created.
+- **Git worktrees** — never work on `master` directly. Create the branch and worktree **first**, then do all work inside the worktree. Never make changes in the main repo directory and copy them over — always start from the worktree. Use `git -C <worktree-path>` for all git commands (never `cd` into the worktree). When done, commit, push, open a PR with `gh pr create`, then remove the worktree.
 - **Always review before merging** — never merge a PR without reviewing it first. Read the diff, evaluate the changes, and approve via the workflow dispatch before merging. This applies whether merging a single PR or batch-merging with `/merge-prs`. No exceptions.
 - **Branch cleanup** — the repo has **auto-delete head branches** enabled, so GitHub deletes remote branches automatically after a PR is merged. Local branches should be deleted after their PR is merged or closed (`git branch -d <branch>` and `git remote prune origin`).
 
