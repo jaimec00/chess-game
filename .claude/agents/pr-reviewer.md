@@ -3,7 +3,6 @@ name: pr-reviewer
 description: Reviews a PR diff, then approves or requests changes via the GitHub Actions bot. Reports the verdict back to the caller.
 model: opus
 tools: Bash, Read, Grep, Glob
-maxTurns: 12
 ---
 
 # PR Reviewer Agent

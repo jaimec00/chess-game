@@ -14,7 +14,7 @@ Review and merge open PRs into master **in the order they were created** (oldest
 
 ### 1. Review (via sub-agent)
 
-Delegate the review to the **pr-reviewer** sub-agent so it runs in a **fresh context window** with no prior conversation history. The sub-agent loads `pr-reviewer.md` (evaluation criteria, strictness policy, review submission steps), reviews the diff, and **submits the review itself** (approve or request changes) via the GitHub Actions bot. Use the Task tool like this:
+Delegate the review to the **pr-reviewer** sub-agent so it runs in a **fresh context window** with no prior conversation history. The agent does NOT automatically load its definition file — the prompt must tell it to read it. Use the Task tool like this:
 
 ```
 Task tool call:
@@ -22,9 +22,9 @@ Task tool call:
   prompt: |
     Review PR #<number> for the chess-game project at /home/jaime/Desktop/chess_game_workspace/chess_game.
     The PR number for all commands is: <number>
-```
 
-The `pr-reviewer` agent definition (`.claude/agents/pr-reviewer.md`) provides the full review instructions, evaluation criteria, strictness policy, and review submission steps. The prompt only needs to specify the PR number.
+    IMPORTANT: First read your full review instructions from /home/jaime/Desktop/chess_game_workspace/chess_game/.claude/agents/pr-reviewer.md and follow them exactly. That file contains the evaluation criteria, strictness policy, and review submission steps.
+```
 
 ### 2. Parse and act on the verdict
 
