@@ -80,8 +80,11 @@ export default function App() {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_40%_50%,#444444_0%,#1a1a1a_40%,#000000_75%)]">
-      <div className="flex gap-20 items-center justify-center w-full h-full p-6 max-md:flex-col max-md:gap-3 max-md:p-2">
+    <div className="h-screen w-screen flex items-center justify-center overflow-hidden bg-[#080a0e] relative">
+      {/* background gradient layers for glass refraction */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_40%_50%,#1a2332_0%,#0d1117_50%,transparent_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_75%_75%,rgba(90,60,150,0.10)_0%,transparent_70%)]" />
+      <div className="relative flex gap-20 items-center justify-center w-full h-full p-6 max-md:flex-col max-md:gap-3 max-md:p-2">
         <Board
           gameState={gameState}
           selectedSquare={selectedSquare}
