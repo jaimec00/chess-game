@@ -12,14 +12,16 @@ You are reviewing a pull request for the chess-game project. Your job is to eval
 
 ## Steps
 
+The caller provides the PR number in the prompt. Use it wherever `<PR_NUMBER>` appears below.
+
 1. **Read the PR metadata** (title, description, changed files):
    ```bash
-   gh pr view $PR_NUMBER --json title,body,files --jq '{title: .title, body: .body, files: [.files[].path]}'
+   gh pr view <PR_NUMBER> --json title,body,files --jq '{title: .title, body: .body, files: [.files[].path]}'
    ```
 
 2. **Read the full diff**:
    ```bash
-   gh pr diff $PR_NUMBER
+   gh pr diff <PR_NUMBER>
    ```
 
 3. **Read CLAUDE.md** for project conventions:
@@ -56,18 +58,18 @@ After completing your evaluation, you **must** submit the review via the GitHub 
 
 - **If approving** (zero issues found):
   ```bash
-  gh workflow run "Approve PR" -f pr-number=$PR_NUMBER
+  gh workflow run "Approve PR" -f pr-number=<PR_NUMBER>
   ```
   Then wait for the workflow to complete and verify the approval landed:
   ```bash
-  sleep 10 && gh pr view $PR_NUMBER --json reviews --jq '.reviews[] | "\(.author.login): \(.state)"'
+  sleep 10 && gh pr view <PR_NUMBER> --json reviews --jq '.reviews[] | "\(.author.login): \(.state)"'
   ```
 
 - **If requesting changes** (any issues found):
   ```bash
-  gh workflow run "Request Changes" -f pr-number=$PR_NUMBER -f body="<numbered list of issues>"
+  gh workflow run "Request Changes" -f pr-number=<PR_NUMBER> -f body="<numbered list of issues>"
   ```
-  Keep the body concise — the `-f body=` flag has shell length limits. If the body is very long, trim to the most critical issues and note that more details are in your full response below.
+  Keep the body concise — the `-f body=` flag is subject to argument list size limits. If the body is very long, trim to the most critical issues and note that more details are in your full response below.
 
 ## Output format
 

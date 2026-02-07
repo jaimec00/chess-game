@@ -14,39 +14,19 @@ Review and merge open PRs into master **in the order they were created** (oldest
 
 ### 1. Review (via sub-agent)
 
-Delegate the review to the **pr-reviewer** sub-agent so it runs in a **fresh context window** with no prior conversation history. The sub-agent reviews the diff, evaluates it, and **submits the review itself** (approve or request changes) via the GitHub Actions bot. Use the Task tool like this:
+Delegate the review to the **pr-reviewer** sub-agent so it runs in a **fresh context window** with no prior conversation history. The sub-agent loads `pr-reviewer.md` (evaluation criteria, strictness policy, review submission steps), reviews the diff, and **submits the review itself** (approve or request changes) via the GitHub Actions bot. Use the Task tool like this:
 
 ```
 Task tool call:
-  subagent_type: "general-purpose"
-  model: "opus"
+  subagent_type: "pr-reviewer"
   prompt: |
-    You are a PR reviewer for the chess-game project at /home/jaime/Desktop/chess_game_workspace/chess_game.
-
-    Review PR #<number> by following these steps:
-
-    1. Read the PR metadata:
-       gh pr view <number> --json title,body,files --jq '{title: .title, body: .body, files: [.files[].path]}'
-
-    2. Read the full diff:
-       gh pr diff <number>
-
-    3. Read CLAUDE.md for project conventions.
-
-    4. If needed, read specific source files for additional context.
-
-    Evaluate for: correctness, safety, style/conventions, completeness (CLAUDE.md updates if needed), documentation accuracy, and no regressions.
-
-    Be STRICT. Every issue — no matter how small — must be fixed before approval. This includes wording nits, inaccurate or misleading comments/documentation, inconsistent terminology, and minor style issues. Do NOT approve with "minor observations" or "non-blocking notes." If you found something worth mentioning, REQUEST_CHANGES for it. The bar for APPROVE is zero issues.
-
-    After your evaluation, submit the review yourself:
-    - If APPROVE: run `gh workflow run "Approve PR" -f pr-number=<number>`, then wait and verify with `sleep 10 && gh pr view <number> --json reviews --jq '.reviews[] | "\(.author.login): \(.state)"'`
-    - If REQUEST_CHANGES: run `gh workflow run "Request Changes" -f pr-number=<number> -f body="<concise numbered list of issues>"`
-
-    Your response MUST start with either APPROVE or REQUEST_CHANGES on the first line, followed by your reasoning and confirmation that you submitted the review.
+    Review PR #<number> for the chess-game project at /home/jaime/Desktop/chess_game_workspace/chess_game.
+    The PR number for all commands is: <number>
 ```
 
-### 2. Act on the verdict
+The `pr-reviewer` agent definition (`.claude/agents/pr-reviewer.md`) provides the full review instructions, evaluation criteria, strictness policy, and review submission steps. The prompt only needs to specify the PR number.
+
+### 2. Parse and act on the verdict
 
 Parse the sub-agent's response:
 - First line will be `APPROVE` or `REQUEST_CHANGES`
