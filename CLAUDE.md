@@ -12,6 +12,10 @@ chess_game/
 │   ├── main.jsx            # React DOM mount
 │   ├── App.jsx             # Root component, state management, game loop
 │   ├── App.css             # Dark felt-table background, layout
+│   ├── assets/
+│   │   └── pieces/         # cburnett SVG piece set (CC BY-SA 3.0)
+│   │       ├── wK/Q/R/B/N/P.svg  # White pieces
+│   │       └── bK/Q/R/B/N/P.svg  # Black pieces
 │   ├── engine/
 │   │   ├── constants.js    # Piece types, colors, values, piece-square tables, initial board
 │   │   ├── board.js        # cloneBoard, getPiece, isInBounds, findKing
@@ -22,9 +26,9 @@ chess_game/
 │   └── components/
 │       ├── Board.jsx/css   # 3D perspective board with wood frame, coordinates
 │       ├── Square.jsx/css  # Individual square: highlights, hover, hints
-│       ├── PieceSVG.jsx    # SVG piece shapes with radial gradient shading
+│       ├── PieceSVG.jsx    # Renders cburnett piece SVGs as <img> elements
 │       ├── GameInfo.jsx/css # Status panel: turn, captures, controls
-│       └── PromotionModal.jsx/css  # Piece picker overlay
+│       └── PromotionModal.jsx/css  # Piece picker overlay (uses PieceSVG)
 ```
 
 ---
@@ -101,7 +105,7 @@ AI RESPONSE (useEffect on gameState.turn === BLACK):
 
 The board uses **CSS 3D perspective** (`perspective(1200px) rotateX(22deg)` as a transform function, not a rendering context) to create a tabletop viewing angle. A `::after` pseudo-element on the board frame renders a visible front edge. A blurred radial-gradient div beneath simulates a table shadow.
 
-Pieces are **custom SVGs** (`PieceSVG.jsx`) — six hand-crafted shapes with a shared base platform, filled with a `radialGradient` (light hitting from upper-left) defined once in a hidden `<svg>` in Board.jsx. White pieces get an ivory-to-tan gradient with dark stroke; black pieces get gray-to-near-black with black stroke. CSS `drop-shadow` filters on the piece wrapper cast shadows onto the board.
+Pieces use the **cburnett SVG set** (`src/assets/pieces/`), the standard piece artwork from lichess.org (CC BY-SA 3.0 by Colin M.L. Burnett). `PieceSVG.jsx` imports all 12 SVGs and renders them as `<img>` elements. CSS `drop-shadow` filters on the piece wrapper cast shadows onto the board.
 
 The info panel uses Cinzel serif for headings and Inter sans-serif for body, with a dark wood-toned card, gradient dividers, and a turn indicator dot (marble-textured radial gradient).
 
@@ -122,4 +126,11 @@ node_modules/.bin/vite build
 node_modules/.bin/vite          # dev server
 ```
 
-**Not a git repository** — the project directory does not have git initialized. If version control is needed, run `git init` first.
+**Git repository** — initialized on the `master` branch, with remote `origin` at `github.com/jaimec00/chess-game`.
+
+### Git & GitHub preferences
+
+- **Branches**: use prefixed names — `feature/…`, `fix/…`, `refactor/…`, etc.
+- **Commits**: short lowercase messages (e.g. `add move timer`, `fix castling bug`).
+- **Commit & push freely** — no need to ask before committing or pushing.
+- **Feature branches + PRs** — create a branch per feature/fix and open a PR to merge into `master`. Don't commit directly to `master` for new work.
