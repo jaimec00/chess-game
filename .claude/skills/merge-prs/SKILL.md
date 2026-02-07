@@ -29,7 +29,10 @@ Review and merge open PRs into master **in the order they were created** (oldest
   ```
   sleep 10 && gh pr view <number> --json reviews --jq '.reviews[] | "\(.author.login): \(.state)"'
   ```
-- **If the PR has problems**: leave a comment explaining the issues with `gh pr review <number> --comment --body "<explanation of what needs fixing>"`, then **skip** this PR and move on to the next one.
+- **If the PR has problems**: request changes by triggering the Request Changes workflow with a review comment explaining the issues, then **skip** this PR and move on to the next one:
+  ```
+  gh workflow run "Request Changes" -f pr-number=<number> -f body="<explanation of what needs fixing>"
+  ```
 
 ### 3. Merge
 

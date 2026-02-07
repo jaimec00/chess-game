@@ -135,7 +135,25 @@ node_modules/.bin/vite          # dev server
 - **Commit & push freely** — no need to ask before committing or pushing.
 - **Feature branches + PRs** — create a branch per feature/fix and open a PR to merge into `master`. Don't commit directly to `master` for new work. This applies to **all** changes — code, docs, config, CLAUDE.md updates, everything. No exceptions.
 - **Git worktrees** — never work on `master` directly. Use `git worktree add` to create a worktree for each branch, do all work there, then commit, push, and open a PR with `gh pr create`. Remove the worktree after the PR is created.
-- **Always review before merging** — never merge a PR without reviewing it first. Read the diff, evaluate the changes, and explicitly approve with `gh pr review <number> --approve` before merging. This applies whether merging a single PR or batch-merging with `/merge-prs`. No exceptions.
+- **Always review before merging** — never merge a PR without reviewing it first. Read the diff, evaluate the changes, and approve via the workflow dispatch before merging. This applies whether merging a single PR or batch-merging with `/merge-prs`. No exceptions.
+
+---
+
+### PR review workflows (`.github/workflows/`)
+
+GitHub blocks self-approving and self-requesting-changes on your own PRs. Two workflow_dispatch actions use the **github-actions bot** to submit reviews on your behalf:
+
+**Approve PR** (`auto-approve.yml`) — approves a PR via `hmarr/auto-approve-action`:
+```bash
+gh workflow run "Approve PR" -f pr-number=<N>
+```
+
+**Request Changes** (`request-changes.yml`) — submits a REQUEST_CHANGES review with a comment via `actions/github-script`:
+```bash
+gh workflow run "Request Changes" -f pr-number=<N> -f body="<explanation>"
+```
+
+Both require the repo setting **"Allow GitHub Actions to create and approve pull requests"** to be enabled (Settings > Actions > General).
 
 ---
 
