@@ -239,11 +239,19 @@ The project lives inside `~/Desktop/chess_game_workspace/chess_game`. The parent
 
 ---
 
+### Sub-agents (`.claude/agents/`)
+
+Custom sub-agent definitions live in `.claude/agents/<name>.md`. Sub-agents run in a **fresh context window** via the Task tool, with no access to the parent conversation's history.
+
+**`pr-reviewer`** — Reviews a single PR diff for correctness, safety, and adherence to project conventions. Returns a structured verdict: first line is `APPROVE` or `REQUEST_CHANGES`, followed by reasoning. Used by the `/merge-prs` skill to ensure each PR is reviewed independently (not influenced by the conversation that created the code).
+
+---
+
 ### Skills (`.claude/skills/`)
 
 Custom slash-command skills live in `.claude/skills/<name>/SKILL.md`.
 
-**`/merge-prs`** — Reviews and merges open PRs into master in creation order. For each PR it reads the diff, approves and merges if it looks good, or requests changes and skips if not. Resolves merge conflicts when they arise. After every merge it pulls from origin to keep local and remote in sync. Accepts optional PR numbers as arguments (e.g. `/merge-prs 5,7,9`).
+**`/merge-prs`** — Reviews and merges open PRs into master in creation order. Each PR review is **delegated to the `pr-reviewer` sub-agent** so it runs in a fresh context window — this prevents the review from being influenced by prior conversation context where the code was written. Based on the sub-agent's verdict, the skill approves and merges the PR or requests changes and skips it. Resolves merge conflicts when they arise. After every merge it pulls from origin to keep local and remote in sync. Accepts optional PR numbers as arguments (e.g. `/merge-prs 5,7,9`).
 
 ---
 
