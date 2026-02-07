@@ -14,7 +14,7 @@ Review and merge open PRs into master **in the order they were created** (oldest
 
 ### 1. Review (via sub-agent)
 
-Delegate the review to the **pr-reviewer** sub-agent so it runs in a **fresh context window** with no prior conversation history. Use the Task tool like this:
+Delegate the review to the **pr-reviewer** sub-agent so it runs in a **fresh context window** with no prior conversation history. The sub-agent reviews the diff, evaluates it, and **submits the review itself** (approve or request changes) via the GitHub Actions bot. Use the Task tool like this:
 
 ```
 Task tool call:
@@ -39,27 +39,21 @@ Task tool call:
 
     Be STRICT. Every issue — no matter how small — must be fixed before approval. This includes wording nits, inaccurate or misleading comments/documentation, inconsistent terminology, and minor style issues. Do NOT approve with "minor observations" or "non-blocking notes." If you found something worth mentioning, REQUEST_CHANGES for it. The bar for APPROVE is zero issues.
 
-    Your response MUST start with either APPROVE or REQUEST_CHANGES on the first line, followed by your reasoning. If requesting changes, provide a numbered list of every issue.
-```
+    After your evaluation, submit the review yourself:
+    - If APPROVE: run `gh workflow run "Approve PR" -f pr-number=<number>`, then wait and verify with `sleep 10 && gh pr view <number> --json reviews --jq '.reviews[] | "\(.author.login): \(.state)"'`
+    - If REQUEST_CHANGES: run `gh workflow run "Request Changes" -f pr-number=<number> -f body="<concise numbered list of issues>"`
 
-Parse the sub-agent's response:
-- First line will be `APPROVE` or `REQUEST_CHANGES`
-- Remaining lines are the reasoning/explanation
+    Your response MUST start with either APPROVE or REQUEST_CHANGES on the first line, followed by your reasoning and confirmation that you submitted the review.
+```
 
 ### 2. Act on the verdict
 
-- **If APPROVE**: trigger the Approve PR workflow, then proceed to merge (step 3):
-  ```
-  gh workflow run "Approve PR" -f pr-number=<number>
-  ```
-  Wait for the workflow to complete before merging:
-  ```
-  sleep 10 && gh pr view <number> --json reviews --jq '.reviews[] | "\(.author.login): \(.state)"'
-  ```
-- **If REQUEST_CHANGES**: trigger the Request Changes workflow with the sub-agent's reasoning as the body, then **skip** this PR and move on to the next one:
-  ```
-  gh workflow run "Request Changes" -f pr-number=<number> -f body="<reasoning from sub-agent>"
-  ```
+Parse the sub-agent's response:
+- First line will be `APPROVE` or `REQUEST_CHANGES`
+- The sub-agent has already submitted the review via the GitHub Actions bot
+
+**If APPROVE**: proceed to merge (step 3).
+**If REQUEST_CHANGES**: **skip** this PR and move on to the next one.
 
 ### 3. Merge
 
