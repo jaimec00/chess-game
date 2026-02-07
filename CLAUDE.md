@@ -104,9 +104,9 @@ Supports the API game mode where an LLM plays as black. No new npm dependencies 
 
 **`prompt.js`** — System prompt and message construction for the LLM chess opponent:
 - `SYSTEM_PROMPT` — instructs the LLM to play as black, respond with SAN on line 1 + comment on line 3, includes SAN notation rules and examples
-- `buildUserMoveMessage(san, gameState)` — constructs a user message with the player's move, board state, and move history
-- `buildFirstMoveMessage(gameState)` — special message for the game's first move
-- `buildIllegalMoveMessage(attempted, gameState)` — feedback message with the full list of legal moves in SAN
+- `buildUserMoveMessage(san)` — constructs a user message with only the player's move (e.g. "My move: e4")
+- `buildFirstMoveMessage(san)` — special message for the game's first move with the player's opening move
+- `buildIllegalMoveMessage(attempted)` — simple feedback that the move was illegal, asks for a different one
 - `parseLLMResponse(text)` → `{move, comment}` — extracts the move from line 1 and comment from after the first blank line
 
 ---
@@ -148,14 +148,14 @@ Same board click handling as Game.jsx (select piece → execute move)
 LLM RESPONSE (useEffect on gameState.turn === BLACK && apiKey set):
   → setIsThinking(true) → "Thinking..." shown in chat
   → Convert player's last move to SAN via moveHistoryToString()
-  → Build user message with board description + move history
-  → Add player move + position to chatMessages
+  → Build user message with just the move (no board state or history)
+  → Add player move to chatMessages
   → Append user message to conversationHistory
   → Call provider.sendMessage() with full conversation
   → Parse response → {move, comment}
   → Validate with sanToMove():
     → If legal: makeMove(), add move+comment to chat, update conversation
-    → If illegal: send feedback with legal moves list, retry (up to 3x)
+    → If illegal: send simple feedback, retry (up to 3x)
   → If all retries fail: show error in chat
   → setIsThinking(false)
 ```
