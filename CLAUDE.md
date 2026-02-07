@@ -189,11 +189,12 @@ LLM RESPONSE (useEffect on gameState.turn === BLACK && apiKey set):
   → setIsThinking(true) → "Thinking..." shown in chat
   → Convert player's last move to SAN via moveHistoryToString()
   → Build user message with the move (no board state)
-  → Generate current board state via boardToDescription()
-  → Build API-only copy of conversation with board state appended to last user message
-  → Store plain conversation (without board state) in conversationHistory
   → Add player move to chatMessages
+  → Build plain conversation array (without board state) from history + new message
+  → Generate current board state via boardToDescription()
+  → Build API-only copy with board state appended to last user message
   → Call provider.sendMessage() with API conversation (only current board state included)
+  → On success/failure: persist plain conversation (without board state) to conversationHistoryRef
   → Parse response → {move, comment}
   → Validate with sanToMove():
     → If legal: makeMove(), add move+comment to chat, update conversation
