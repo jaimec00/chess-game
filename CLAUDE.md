@@ -273,10 +273,15 @@ node scripts/screenshot.mjs /tmp/landing.png --page landing       # landing page
 node scripts/screenshot.mjs /tmp/api.png --page api               # API game page
 ```
 
-**`scripts/upload-screenshot.sh`** — Uploads the PNG to a `pr-screenshots` orphan branch on GitHub (via Contents API) and prepends a `## Screenshot` section with the image to the PR body. Creates the orphan branch automatically on first run. Usage:
+**`scripts/upload-screenshot.sh`** — Uploads a PNG to a `pr-screenshots` orphan branch on GitHub (via Contents API) and adds it to the `## Screenshot` section in the PR body. Creates the orphan branch automatically on first run. Supports `--label <name>` for distinct filenames when uploading multiple screenshots to the same PR. Usage:
 
 ```bash
-bash scripts/upload-screenshot.sh <image-path> <pr-number>
+bash scripts/upload-screenshot.sh <image-path> <pr-number> [--label <name>]
+# Examples:
+bash scripts/upload-screenshot.sh /tmp/play.png 30 --label play     # → pr-30-play.png
+bash scripts/upload-screenshot.sh /tmp/landing.png 30 --label landing # → pr-30-landing.png
+bash scripts/upload-screenshot.sh /tmp/api.png 30 --label api        # → pr-30-api.png
+bash scripts/upload-screenshot.sh /tmp/shot.png 30                   # → pr-30.png (no label)
 ```
 
 **Automation rule** — when a PR touches any of these paths, capture and attach a screenshot before (or right after) creating the PR:
@@ -291,10 +296,13 @@ bash scripts/upload-screenshot.sh <image-path> <pr-number>
 
 ```bash
 export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-node scripts/screenshot.mjs /tmp/chess-screenshot.png                # game board
-node scripts/screenshot.mjs /tmp/landing.png --page landing          # landing page
+node scripts/screenshot.mjs /tmp/play.png --page play
+node scripts/screenshot.mjs /tmp/landing.png --page landing
+node scripts/screenshot.mjs /tmp/api.png --page api
 gh pr create --title "…" --body "…"
-bash scripts/upload-screenshot.sh /tmp/chess-screenshot.png <pr-number>
+bash scripts/upload-screenshot.sh /tmp/play.png <pr-number> --label play
+bash scripts/upload-screenshot.sh /tmp/landing.png <pr-number> --label landing
+bash scripts/upload-screenshot.sh /tmp/api.png <pr-number> --label api
 ```
 
 The screenshot is never committed to the feature branch — it lives only on the `pr-screenshots` orphan branch.
@@ -331,7 +339,7 @@ Custom slash-command skills live in `.claude/skills/<name>/SKILL.md`.
 
 **`/merge-prs`** — Reviews and merges open PRs into master in creation order. Each PR review is **delegated to the `pr-reviewer` sub-agent** so it runs in a fresh context window — this prevents the review from being influenced by prior conversation context where the code was written. The sub-agent submits the review itself (approve or request changes) via the GitHub Actions bot, then reports the verdict back. The main agent merges approved PRs or skips rejected ones. Resolves merge conflicts when they arise. After every merge it pulls from origin to keep local and remote in sync. Accepts optional PR numbers as arguments (e.g. `/merge-prs 5,7,9`).
 
-**`/pr-screenshot`** — Captures a screenshot of the running game and attaches it to a PR. Usage: `/pr-screenshot <pr-number> [source-dir] [--page <name>]`. Builds the app from the source directory (defaults to main repo), launches headless Brave to take a 2x PNG of the specified page (`play` default, or `landing`), uploads it to the `pr-screenshots` orphan branch via the GitHub Contents API, and prepends a `## Screenshot` section to the PR body. Handles worktree `node_modules` symlinking and uses `upload-screenshot.sh` for uploading and PR body updates (including auto-fixing `\!` escaping). Call this skill after creating any PR that touches UI files (`src/components/**`, `src/App.jsx`, `src/index.css`, `src/assets/**`, `index.html`).
+**`/pr-screenshot`** — Captures one or more screenshots of the running game and attaches them to a PR. Usage: `/pr-screenshot <pr-number> [source-dir] [--page <name>]`. Builds the app from the source directory (defaults to main repo), launches headless Brave to take a 2x PNG of the specified page (`play` default, `landing`, `api`, or `all` for every page). Uploads to the `pr-screenshots` orphan branch with distinct filenames via `--label` and creates or appends to the `## Screenshot` section in the PR body. Handles worktree `node_modules` symlinking and auto-fixes `\!` escaping. Call this skill after creating any PR that touches UI files (`src/components/**`, `src/App.jsx`, `src/index.css`, `src/assets/**`, `index.html`).
 
 ---
 
@@ -348,4 +356,4 @@ Custom slash-command skills live in `.claude/skills/<name>/SKILL.md`.
 - **`git worktree add` from a detached branch** — if you `git checkout feature-branch` on the main repo first and then try `git worktree add ../path feature-branch`, it fails because the branch is already checked out. Stay on `master` in the main repo and create the worktree directly from there.
 - **`upload-screenshot.sh` 404 SHA bug (fixed)** — previously, when the screenshot file didn't exist on the `pr-screenshots` branch, `gh api ... --jq '.sha'` with `|| true` captured the full 404 JSON error body into `EXISTING_SHA`, corrupting the upload payload. Fixed by checking exit code explicitly and building JSON with `jq -n --rawfile`. The script also now auto-fixes `\!` escaping in the PR body.
 - **Worktree missing `node_modules`** — git worktrees only contain tracked files. The screenshot script needs `node_modules` (for `puppeteer-core` and `vite`). Symlink from the main repo: `ln -s /path/to/chess_game/node_modules <worktree>/node_modules`.
-- **Multiple screenshots per PR** — `upload-screenshot.sh` uploads to the `pr-screenshots` branch as `pr-<N>.png`. If you upload multiple screenshots for the same PR, they overwrite each other. Use distinct filenames when uploading manually (e.g. `pr-28-landing.png`, `pr-28-api.png`) via the GitHub Contents API directly, and reference each URL explicitly in the PR body.
+- **Multiple screenshots per PR** — use `--label <page>` when uploading multiple screenshots to the same PR (e.g. `--label play`, `--label landing`, `--label api`). This gives each a distinct filename (`pr-N-play.png`, etc.) and appends all images to the same `## Screenshot` section. Without `--label`, the filename is `pr-<N>.png` and successive uploads overwrite each other.
