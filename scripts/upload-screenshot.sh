@@ -46,22 +46,35 @@ fi
 
 API_PATH="repos/${REPO}/contents/${FILENAME}"
 
-# Check if file already exists (need its SHA to overwrite)
-EXISTING_SHA=$(gh api "${API_PATH}?ref=${BRANCH}" --jq '.sha' 2>/dev/null || true)
+# Check if file already exists (need its SHA to overwrite).
+# gh api outputs the full 404 JSON to stdout on missing files, so we must
+# check the exit code explicitly — not just capture output with || true.
+EXISTING_SHA=""
+if gh api "${API_PATH}?ref=${BRANCH}" --jq '.sha' > /tmp/existing-sha.txt 2>/dev/null; then
+  EXISTING_SHA=$(cat /tmp/existing-sha.txt)
+fi
+rm -f /tmp/existing-sha.txt
 
-# Build JSON payload with base64 content, writing to a temp file to avoid arg-list limits
+# Build JSON payload using jq --rawfile to avoid "Argument list too long" from
+# passing the base64 content as a shell variable or jq --arg.
 UPLOAD_JSON=$(mktemp)
 trap 'rm -f "$UPLOAD_JSON"' EXIT
 
-{
-  printf '{"message":"add screenshot for PR #%s","branch":"%s","content":"' "$PR_NUMBER" "$BRANCH"
-  base64 -w0 "$IMAGE_PATH"
-  printf '"'
-  if [ -n "$EXISTING_SHA" ]; then
-    printf ',"sha":"%s"' "$EXISTING_SHA"
-  fi
-  printf '}'
-} > "$UPLOAD_JSON"
+base64 -w0 "$IMAGE_PATH" > /tmp/b64content.txt
+
+if [ -n "$EXISTING_SHA" ]; then
+  jq -n --rawfile content /tmp/b64content.txt \
+    --arg msg "add screenshot for PR #${PR_NUMBER}" \
+    --arg branch "$BRANCH" \
+    --arg sha "$EXISTING_SHA" \
+    '{"message":$msg,"branch":$branch,"content":$content,"sha":$sha}' > "$UPLOAD_JSON"
+else
+  jq -n --rawfile content /tmp/b64content.txt \
+    --arg msg "add screenshot for PR #${PR_NUMBER}" \
+    --arg branch "$BRANCH" \
+    '{"message":$msg,"branch":$branch,"content":$content}' > "$UPLOAD_JSON"
+fi
+rm -f /tmp/b64content.txt
 
 gh api "$API_PATH" -X PUT --input "$UPLOAD_JSON" --silent
 echo "Uploaded ${FILENAME} to ${BRANCH}."
@@ -86,11 +99,21 @@ ${CURRENT_BODY}"
 
   # Use REST API to update the PR body (avoids gh pr edit GraphQL issues)
   BODY_JSON=$(mktemp)
-  # Use jq to properly escape the body string
   printf '%s' "$NEW_BODY" | jq -Rs '{"body": .}' > "$BODY_JSON"
   gh api "repos/${REPO}/pulls/${PR_NUMBER}" -X PATCH --input "$BODY_JSON" --silent
   rm -f "$BODY_JSON"
   echo "PR #${PR_NUMBER} body updated with screenshot."
+
+  # jq -Rs can escape ! to \! which breaks GitHub image markdown rendering.
+  # Verify and fix if needed.
+  UPDATED_BODY=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.body')
+  if echo "$UPDATED_BODY" | grep -q '\\!'; then
+    echo "Fixing escaped \\! in PR body..."
+    FIX_JSON=$(mktemp)
+    printf '%s' "$UPDATED_BODY" | sed 's/\\!/!/g' | jq -Rs '{"body": .}' > "$FIX_JSON"
+    gh api "repos/${REPO}/pulls/${PR_NUMBER}" -X PATCH --input "$FIX_JSON" --silent
+    rm -f "$FIX_JSON"
+  fi
 fi
 
 echo "Done."
