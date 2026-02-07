@@ -2,18 +2,18 @@
 
 ### Overview
 
-A complete browser chess game (~1,800 lines) — Player (white) vs AI (black) with full standard rules, built from scratch with React 19 + Vite + Tailwind CSS v4 + shadcn/ui. No external chess libraries.
+A complete browser chess game (~1,800 lines) — Player (white) vs AI (black) with full standard rules, built from scratch with React 19 + Vite + Tailwind CSS v4 + shadcn/ui + react-router-dom. No external chess libraries.
 
 ```
 chess_game/
 ├── index.html              # Entry HTML, loads Google Fonts (Cinzel, Inter)
-├── package.json            # React 19, Vite 7, Tailwind v4, shadcn/ui
+├── package.json            # React 19, Vite 7, Tailwind v4, shadcn/ui, react-router-dom
 ├── jsconfig.json           # @/* path alias for shadcn imports
 ├── components.json         # shadcn/ui configuration
 ├── src/
-│   ├── main.jsx            # React DOM mount + CSS import
+│   ├── main.jsx            # React DOM mount + BrowserRouter + CSS import
 │   ├── index.css           # Tailwind entry point, theme tokens, keyframes
-│   ├── App.jsx             # Root component, state management, game loop
+│   ├── App.jsx             # Router shell: shared background + <Routes>
 │   ├── lib/
 │   │   └── utils.js        # cn() helper (clsx + tailwind-merge)
 │   ├── assets/
@@ -29,6 +29,8 @@ chess_game/
 │   │   └── ai.js           # Minimax + alpha-beta pruning (depth 3), positional evaluation
 │   └── components/
 │       ├── ui/             # shadcn/ui primitives (Card, Button, Badge, Dialog)
+│       ├── LandingPage.jsx # "/" route — "chess rot" title + nav buttons
+│       ├── Game.jsx        # "/play" route — game state, handlers, board + info panel
 │       ├── Board.jsx       # Board with glass frame, coordinates
 │       ├── Board.css       # Grid sizing, inner shadow + responsive media queries (~30 lines)
 │       ├── Square.jsx      # Individual square: highlights, hover, hints (all Tailwind)
@@ -79,7 +81,7 @@ All pure JavaScript — zero React dependency, portable and independently testab
 
 ```
 User clicks square
-  → Square.onClick → App.handleSquareClick(row, col)
+  → Square.onClick → Game.handleSquareClick(row, col)
 
 FIRST CLICK (select piece):
   → Verify piece.color === WHITE
@@ -125,7 +127,20 @@ AI RESPONSE (useEffect on gameState.turn === BLACK):
 
 ---
 
+### Routing
+
+Uses **react-router-dom** with `BrowserRouter` (wrapped in `main.jsx`). `App.jsx` renders the shared full-screen background container with gradient layers, then `<Routes>` picks the page:
+
+- `/` → `LandingPage` — title screen with "chess rot" and navigation buttons
+- `/play` → `Game` — the chess board + info panel (all game state lives here)
+
+Navigation uses `<Link to="/play">` from react-router-dom. The shared background (`bg-[#080a0e]` + gradient divs) is rendered once in `App.jsx` so both pages share the same dark canvas.
+
+---
+
 ### Visual architecture
+
+**Landing page** (`LandingPage.jsx`) — full-screen centered layout over the shared dark background. "chess rot" in `font-ocr` (Share Tech Mono) at `8rem` (responsive: `4rem` tablet, `2.5rem` phone), `uppercase`, `tracking-[0.15em]`, with `-webkit-text-stroke: 2px` for thickness and a faint blue text-shadow glow. Below: a flex column of shadcn `Button variant="outline"` links with glass styling (`bg-white/[0.03] backdrop-blur-sm border-white/[0.08]`), blue glow on hover. Structured as a button group so future options (online play, puzzles) are just additional `<Button>` entries.
 
 The visual theme is **dark glassmorphism** — semi-transparent cards over a near-black background (`#080a0e`) with two layered radial gradients: a blue-gray ellipse centered near the board (`#1a2332` → `#0d1117` → transparent) and a faint purple accent in the lower-right (`rgba(90,60,150,0.10)`). These color layers give `backdrop-blur` surfaces visible refraction.
 
