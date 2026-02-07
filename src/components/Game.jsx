@@ -81,7 +81,7 @@ export default function Game() {
 
   return (
     <>
-      <div className="relative flex gap-20 items-center justify-center w-full h-full p-6 max-md:flex-col max-md:gap-3 max-md:p-2">
+      <div className="relative flex gap-20 items-stretch justify-center w-full h-full p-6 max-md:flex-col max-md:gap-3 max-md:p-2">
         <Board
           gameState={gameState}
           selectedSquare={selectedSquare}

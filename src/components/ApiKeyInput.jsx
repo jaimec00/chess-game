@@ -26,7 +26,7 @@ export default function ApiKeyInput({ providerId, apiKey, onApiKeyChange }) {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <Label className="font-ocr text-[11px] uppercase tracking-[1.5px] text-muted-foreground">
+      <Label className="font-ocr text-[13px] uppercase tracking-[1.5px] text-muted-foreground">
         API Key
       </Label>
       <div className="flex gap-2 items-center">
@@ -36,13 +36,13 @@ export default function ApiKeyInput({ providerId, apiKey, onApiKeyChange }) {
         }`} />
         {hasKey ? (
           <>
-            <span className="font-ocr text-xs text-muted-foreground flex-1 truncate">
+            <span className="font-ocr text-sm text-muted-foreground flex-1 truncate">
               {apiKey.slice(0, 12)}...
             </span>
             <Button
               variant="outline"
               size="sm"
-              className="font-ocr text-[10px] uppercase tracking-[1px] h-7 px-2.5 bg-white/[0.04] border-white/10 hover:bg-red-500/10 hover:border-red-400/30 hover:text-red-300 transition-all"
+              className="font-ocr text-[12px] uppercase tracking-[1px] h-8 px-3 bg-white/[0.04] border-white/10 hover:bg-red-500/10 hover:border-red-400/30 hover:text-red-300 transition-all"
               onClick={handleClear}
             >
               Clear
@@ -56,12 +56,12 @@ export default function ApiKeyInput({ providerId, apiKey, onApiKeyChange }) {
               value={draft}
               onChange={e => setDraft(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="h-7 font-ocr text-xs bg-white/[0.04] border-white/10 placeholder:text-white/20 flex-1"
+              className="h-8 font-ocr text-sm bg-white/[0.04] border-white/10 placeholder:text-white/20 flex-1"
             />
             <Button
               variant="outline"
               size="sm"
-              className="font-ocr text-[10px] uppercase tracking-[1px] h-7 px-2.5 bg-white/[0.04] border-white/10 hover:bg-white/[0.10] hover:border-white/20 transition-all"
+              className="font-ocr text-[12px] uppercase tracking-[1px] h-8 px-3 bg-white/[0.04] border-white/10 hover:bg-white/[0.10] hover:border-white/20 transition-all"
               onClick={handleSave}
               disabled={!draft.trim()}
             >
@@ -70,7 +70,7 @@ export default function ApiKeyInput({ providerId, apiKey, onApiKeyChange }) {
           </>
         )}
       </div>
-      <p className="font-ocr text-[9px] text-white/25 leading-tight">
+      <p className="font-ocr text-[11px] text-white/25 leading-tight">
         Stored locally. Sent only to the provider's API.
       </p>
     </div>

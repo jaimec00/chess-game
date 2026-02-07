@@ -44,17 +44,17 @@ export default function ChatBox({
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="font-ocr text-[22px] font-bold tracking-[3px] uppercase text-gold">
+            <CardTitle className="font-ocr text-[28px] font-bold tracking-[3px] uppercase text-gold">
               Chat
             </CardTitle>
-            <CardDescription className="font-ocr text-[11px] font-bold tracking-[1.5px] uppercase text-muted-foreground">
+            <CardDescription className="font-ocr text-sm font-bold tracking-[1.5px] uppercase text-muted-foreground">
               Player vs {modelName || 'LLM'}
             </CardDescription>
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="font-ocr text-[9px] uppercase tracking-[1px] h-6 px-2 bg-white/[0.04] border-white/10 hover:bg-white/[0.10] hover:border-white/20 transition-all"
+            className="font-ocr text-[11px] uppercase tracking-[1px] h-7 px-2.5 bg-white/[0.04] border-white/10 hover:bg-white/[0.10] hover:border-white/20 transition-all"
             onClick={onToggleView}
           >
             {viewMode === 'commentary' ? 'Full' : 'Moves'}
@@ -72,7 +72,7 @@ export default function ChatBox({
               <ChatMessage key={i} message={msg} />
             ))}
             {isThinking && (
-              <div className="flex items-center gap-2 text-muted-foreground text-[13px] font-ocr font-bold py-1">
+              <div className="flex items-center gap-2 text-muted-foreground text-[15px] font-ocr font-bold py-1">
                 <span className="inline-block w-2 h-2 rounded-full bg-muted-foreground animate-dots-pulse" />
                 Thinking...
               </div>
@@ -93,10 +93,10 @@ export default function ChatBox({
               ? 'bg-[#e8e0d0] shadow-[0_0_8px_rgba(220,200,160,0.35),inset_0_0_2px_rgba(255,255,255,0.3)]'
               : 'bg-[#3a3232] border border-[#4a4040]'
           )} />
-          <span className="text-[14px] font-ocr font-bold text-card-foreground">{statusText}</span>
+          <span className="text-[17px] font-ocr font-bold text-card-foreground">{statusText}</span>
         </div>
         {status === 'check' && (
-          <Badge className="self-start bg-destructive/80 text-[#f0c8b8] border-none text-[11px] font-ocr font-bold tracking-[2px] uppercase rounded">
+          <Badge className="self-start bg-destructive/80 text-[#f0c8b8] border-none text-[13px] font-ocr font-bold tracking-[2px] uppercase rounded">
             CHECK
           </Badge>
         )}
@@ -114,7 +114,7 @@ export default function ChatBox({
       <CardFooter className="pt-3">
         <Button
           variant="outline"
-          className="w-full font-ocr text-[13px] font-bold tracking-[1.5px] uppercase text-card-foreground bg-white/[0.04] backdrop-blur-sm border-white/10 hover:bg-white/[0.10] hover:border-white/20 hover:text-foreground hover:shadow-[0_0_12px_rgba(100,140,200,0.08)] active:translate-y-px transition-all"
+          className="w-full font-ocr text-[15px] font-bold tracking-[1.5px] uppercase text-card-foreground bg-white/[0.04] backdrop-blur-sm border-white/10 hover:bg-white/[0.10] hover:border-white/20 hover:text-foreground hover:shadow-[0_0_12px_rgba(100,140,200,0.08)] active:translate-y-px transition-all"
           onClick={onNewGame}
         >
           New Game
@@ -131,7 +131,7 @@ function ChatMessage({ message }) {
   if (role === 'system') {
     return (
       <div className={cn(
-        'text-center text-[11px] font-ocr py-1',
+        'text-center text-[13px] font-ocr py-1',
         type === 'error' ? 'text-red-400/80' : 'text-white/30',
       )}>
         {content}
@@ -144,7 +144,7 @@ function ChatMessage({ message }) {
     return (
       <div className="flex justify-end">
         <div className="bg-white/[0.06] backdrop-blur-sm border border-white/[0.08] rounded-lg px-3 py-1.5 max-w-[85%]">
-          <span className="font-ocr text-[13px] font-bold text-white/80">
+          <span className="font-ocr text-[15px] font-bold text-white/80">
             {moveSAN || content}
           </span>
         </div>
@@ -159,12 +159,12 @@ function ChatMessage({ message }) {
         <div className="flex justify-start">
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-3 py-1.5 max-w-[85%]">
             <div className="flex items-center gap-2">
-              <Badge className="bg-white/[0.08] text-white/60 border-none text-[9px] font-ocr font-bold tracking-[1px] uppercase rounded px-1.5 py-0">
+              <Badge className="bg-white/[0.08] text-white/60 border-none text-[11px] font-ocr font-bold tracking-[1px] uppercase rounded px-1.5 py-0">
                 {moveSAN}
               </Badge>
             </div>
             {content && (
-              <p className="font-ocr text-[12px] text-white/50 mt-1 leading-relaxed">
+              <p className="font-ocr text-[14px] text-white/50 mt-1 leading-relaxed">
                 {content}
               </p>
             )}
@@ -176,7 +176,7 @@ function ChatMessage({ message }) {
     // Position description (collapsible in full view)
     if (type === 'position') {
       return (
-        <div className="text-center text-[9px] font-ocr text-white/15 py-0.5 truncate">
+        <div className="text-center text-[11px] font-ocr text-white/15 py-0.5 truncate">
           [position sent to LLM]
         </div>
       );
@@ -193,14 +193,14 @@ function CapturedPieces({ label, pieces }) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-baseline justify-between">
-        <span className="text-[11px] uppercase tracking-[1px] text-muted-foreground font-ocr font-bold">{label}</span>
-        {totalValue > 0 && <span className="text-[12px] text-gold-dim font-ocr font-bold">+{totalValue / 100}</span>}
+        <span className="text-sm uppercase tracking-[1px] text-muted-foreground font-ocr font-bold">{label}</span>
+        {totalValue > 0 && <span className="text-[15px] text-gold-dim font-ocr font-bold">+{totalValue / 100}</span>}
       </div>
-      <div className="flex flex-wrap gap-0.5 min-h-6 items-center">
+      <div className="flex flex-wrap gap-1 min-h-8 items-center">
         {sorted.length === 0
-          ? <span className="text-sm text-white/10">&mdash;</span>
+          ? <span className="text-base text-white/10">&mdash;</span>
           : sorted.map((p, i) => (
-              <span key={i} className="text-[20px] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] opacity-90">
+              <span key={i} className="text-[26px] leading-none drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] opacity-90">
                 {PIECE_SYMBOLS[p.color][p.type]}
               </span>
             ))

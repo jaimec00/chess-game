@@ -249,7 +249,7 @@ export default function ApiGame() {
 
   return (
     <>
-      <div className="relative flex gap-6 items-center justify-center w-full h-full p-6 max-lg:flex-col max-lg:gap-3 max-lg:p-2">
+      <div className="relative flex gap-6 items-stretch justify-center w-full h-full p-6 max-lg:flex-col max-lg:gap-3 max-lg:p-2">
         {/* Board */}
         <div className="shrink-0">
           <Board
@@ -266,9 +266,9 @@ export default function ApiGame() {
         </div>
 
         {/* Right panel */}
-        <div className="flex flex-col gap-3 w-[340px] max-h-[min(82vh,700px)] max-lg:w-full max-lg:max-w-[500px] max-lg:max-h-[400px]">
+        <div className="flex flex-col gap-3 w-[380px] max-lg:w-full max-lg:max-w-[500px] max-lg:max-h-[400px]">
           {/* Controls */}
-          <div className="bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-lg p-3 flex flex-col gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]">
+          <div className="bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-lg p-4 flex flex-col gap-3 shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)]">
             <ProviderSelect
               providerId={providerId}
               modelId={modelId}
