@@ -1,6 +1,6 @@
 ---
 name: pr-screenshot
-description: Capture a screenshot of the running game and attach it to a PR.
+description: Capture one or more screenshots of the running game and attach them to a PR.
 ---
 
 ## Context
