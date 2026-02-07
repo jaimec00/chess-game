@@ -21,8 +21,15 @@ Review and merge open PRs into master **in the order they were created** (oldest
 
 ### 2. Decide
 
-- **If the PR looks good**: approve it with `gh pr review <number> --approve --body "<brief reason>"`, then proceed to merge (step 3).
-- **If the PR has problems**: leave a comment explaining the issues with `gh pr review <number> --request-changes --body "<explanation of what needs fixing>"`, then **skip** this PR and move on to the next one.
+- **If the PR looks good**: approve it by triggering the Approve PR workflow, then proceed to merge (step 3):
+  ```
+  gh workflow run "Approve PR" -f pr-number=<number>
+  ```
+  Wait for the workflow to complete before merging:
+  ```
+  sleep 10 && gh pr view <number> --json reviews --jq '.reviews[] | "\(.author.login): \(.state)"'
+  ```
+- **If the PR has problems**: leave a comment explaining the issues with `gh pr review <number> --comment --body "<explanation of what needs fixing>"`, then **skip** this PR and move on to the next one.
 
 ### 3. Merge
 
