@@ -205,10 +205,14 @@ Both require the repo setting **"Allow GitHub Actions to create and approve pull
 
 Two scripts automate capturing a PNG of the running game and attaching it to a pull request.
 
-**`scripts/screenshot.mjs`** — Builds the app with Vite, starts `vite preview` on port 4173, launches headless Brave via `puppeteer-core`, waits for the `.board` selector + fonts + a 500ms settle, and saves a 2x-resolution PNG. Usage:
+**`scripts/screenshot.mjs`** — Builds the app with Vite, starts `vite preview` on port 4173, launches headless Brave via `puppeteer-core`, waits for a page-specific selector + fonts + a 500ms settle, and saves a 2x-resolution PNG. Supports a `--page` flag to target different routes:
 
 ```bash
-node scripts/screenshot.mjs [output-path]   # default: /tmp/chess-screenshot.png
+node scripts/screenshot.mjs [output-path] [--page <name>]
+# Pages: play (default, /play, waits for .board), landing (/, waits for h1)
+# Examples:
+node scripts/screenshot.mjs /tmp/chess-screenshot.png             # game board (default)
+node scripts/screenshot.mjs /tmp/landing.png --page landing       # landing page
 ```
 
 **`scripts/upload-screenshot.sh`** — Uploads the PNG to a `pr-screenshots` orphan branch on GitHub (via Contents API) and prepends a `## Screenshot` section with the image to the PR body. Creates the orphan branch automatically on first run. Usage:
@@ -229,7 +233,8 @@ bash scripts/upload-screenshot.sh <image-path> <pr-number>
 
 ```bash
 export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-node scripts/screenshot.mjs /tmp/chess-screenshot.png
+node scripts/screenshot.mjs /tmp/chess-screenshot.png                # game board
+node scripts/screenshot.mjs /tmp/landing.png --page landing          # landing page
 gh pr create --title "…" --body "…"
 bash scripts/upload-screenshot.sh /tmp/chess-screenshot.png <pr-number>
 ```

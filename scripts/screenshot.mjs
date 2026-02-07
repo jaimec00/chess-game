@@ -9,7 +9,31 @@ const BRAVE_PATH = '/usr/bin/brave-browser';
 const PREVIEW_PORT = 4173;
 const PREVIEW_URL = `http://localhost:${PREVIEW_PORT}`;
 
-const outPath = resolve(process.argv[2] || '/tmp/chess-screenshot.png');
+// Page definitions: route path + wait selector
+const PAGES = {
+  play:    { path: '/play',  selector: '.board' },
+  landing: { path: '/',      selector: 'h1' },
+};
+
+// Parse args: [output-path] [--page <name>]
+let outPath = '/tmp/chess-screenshot.png';
+let pageName = 'play';
+
+const args = process.argv.slice(2);
+for (let i = 0; i < args.length; i++) {
+  if (args[i] === '--page' && args[i + 1]) {
+    pageName = args[++i];
+  } else if (!args[i].startsWith('-')) {
+    outPath = args[i];
+  }
+}
+outPath = resolve(outPath);
+
+const pageConfig = PAGES[pageName];
+if (!pageConfig) {
+  console.error(`Unknown page "${pageName}". Available: ${Object.keys(PAGES).join(', ')}`);
+  process.exit(1);
+}
 
 if (!existsSync(BRAVE_PATH)) {
   console.error(`Brave not found at ${BRAVE_PATH}`);
@@ -67,16 +91,17 @@ try {
   const page = await browser.newPage();
   await page.setViewport({ width: 1400, height: 900, deviceScaleFactor: 2 });
 
-  console.log(`Navigating to ${PREVIEW_URL}...`);
-  await page.goto(PREVIEW_URL, { waitUntil: 'networkidle0', timeout: 30000 });
+  const targetUrl = `${PREVIEW_URL}${pageConfig.path}`;
+  console.log(`Navigating to ${targetUrl} (page: ${pageName})...`);
+  await page.goto(targetUrl, { waitUntil: 'networkidle0', timeout: 30000 });
 
-  // Wait for the board to render
-  await page.waitForSelector('.board', { timeout: 10000 });
+  // Wait for the page-specific selector
+  await page.waitForSelector(pageConfig.selector, { timeout: 10000 });
 
   // Wait for fonts to load
   await page.evaluate(() => document.fonts.ready);
 
-  // Extra settle time for CSS transitions / 3D rendering
+  // Extra settle time for CSS transitions
   await new Promise((r) => setTimeout(r, 500));
 
   console.log(`Saving screenshot to ${outPath}...`);
