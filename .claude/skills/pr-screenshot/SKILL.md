@@ -13,10 +13,11 @@ description: Capture a screenshot of the running game and attach it to a PR.
 
 Capture a screenshot of the chess game from a source directory (worktree or main repo) and attach it to a pull request.
 
-`$ARGUMENTS` is required and has the format: `<pr-number> [source-dir]`
+`$ARGUMENTS` is required and has the format: `<pr-number> [source-dir] [--page <name>]`
 
 - `<pr-number>` — the PR to attach the screenshot to (required).
 - `[source-dir]` — absolute path to the directory containing the code to screenshot (optional, defaults to the main repo dir `/home/jaime/Desktop/chess_game_workspace/chess_game`).
+- `[--page <name>]` — which page to screenshot (optional, defaults to `play`). Available pages: `play` (`/play`, waits for `.board`), `landing` (`/`, waits for `h1`).
 
 ### 1. Parse arguments
 
@@ -38,8 +39,10 @@ Source nvm (required — node is not on the system PATH), `cd` into the source d
 
 ```bash
 export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-cd <source-dir> && node scripts/screenshot.mjs /tmp/chess-screenshot.png
+cd <source-dir> && node scripts/screenshot.mjs /tmp/chess-screenshot.png [--page <name>]
 ```
+
+Pass the `--page` flag if specified in `$ARGUMENTS`. If not specified, the script defaults to the `play` page.
 
 **You MUST `cd` into the source directory** — the script resolves `node_modules/.bin/vite` relative to CWD.
 
