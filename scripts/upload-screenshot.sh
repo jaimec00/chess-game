@@ -28,18 +28,12 @@ if ! gh api "repos/${REPO}/git/ref/heads/${BRANCH}" --silent 2>/dev/null; then
   echo "Creating orphan branch '${BRANCH}'..."
 
   # Create an empty tree
-  EMPTY_TREE=$(gh api "repos/${REPO}/git/trees" \
-    -f 'tree[0][path]=.gitkeep' \
-    -f 'tree[0][mode]=100644' \
-    -f 'tree[0][type]=blob' \
-    -f 'tree[0][content]=' \
-    --jq '.sha')
+  EMPTY_TREE=$(echo '{"tree":[{"path":".gitkeep","mode":"100644","type":"blob","content":""}]}' \
+    | gh api "repos/${REPO}/git/trees" --input - --jq '.sha')
 
-  # Create a parentless commit
-  COMMIT_SHA=$(gh api "repos/${REPO}/git/commits" \
-    -f message="initialize pr-screenshots branch" \
-    -f "tree=${EMPTY_TREE}" \
-    --jq '.sha')
+  # Create a parentless commit (no parents = orphan)
+  COMMIT_SHA=$(echo "{\"message\":\"initialize pr-screenshots branch\",\"tree\":\"${EMPTY_TREE}\",\"parents\":[]}" \
+    | gh api "repos/${REPO}/git/commits" --input - --jq '.sha')
 
   # Create the ref
   gh api "repos/${REPO}/git/refs" \
@@ -50,23 +44,26 @@ fi
 
 # --- Upload the image via Contents API ---
 
-CONTENT=$(base64 -w0 "$IMAGE_PATH")
 API_PATH="repos/${REPO}/contents/${FILENAME}"
 
 # Check if file already exists (need its SHA to overwrite)
-EXISTING_SHA=$(gh api "${API_PATH}?ref=${BRANCH}" --jq '.sha' 2>/dev/null || echo "")
+EXISTING_SHA=$(gh api "${API_PATH}?ref=${BRANCH}" --jq '.sha' 2>/dev/null || true)
 
-UPLOAD_ARGS=(
-  -f "message=add screenshot for PR #${PR_NUMBER}"
-  -f "content=${CONTENT}"
-  -f "branch=${BRANCH}"
-)
+# Build JSON payload with base64 content, writing to a temp file to avoid arg-list limits
+UPLOAD_JSON=$(mktemp)
+trap 'rm -f "$UPLOAD_JSON"' EXIT
 
-if [ -n "$EXISTING_SHA" ]; then
-  UPLOAD_ARGS+=(-f "sha=${EXISTING_SHA}")
-fi
+{
+  printf '{"message":"add screenshot for PR #%s","branch":"%s","content":"' "$PR_NUMBER" "$BRANCH"
+  base64 -w0 "$IMAGE_PATH"
+  printf '"'
+  if [ -n "$EXISTING_SHA" ]; then
+    printf ',"sha":"%s"' "$EXISTING_SHA"
+  fi
+  printf '}'
+} > "$UPLOAD_JSON"
 
-gh api "$API_PATH" -X PUT "${UPLOAD_ARGS[@]}" --silent
+gh api "$API_PATH" -X PUT --input "$UPLOAD_JSON" --silent
 echo "Uploaded ${FILENAME} to ${BRANCH}."
 
 # --- Build the raw URL ---
@@ -76,7 +73,7 @@ echo "Image URL: ${IMAGE_URL}"
 
 # --- Prepend screenshot section to PR body ---
 
-CURRENT_BODY=$(gh pr view "$PR_NUMBER" --json body -q '.body')
+CURRENT_BODY=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.body')
 
 if echo "$CURRENT_BODY" | grep -q '## Screenshot'; then
   echo "PR body already contains a screenshot section — skipping."
@@ -87,7 +84,12 @@ else
 
 ${CURRENT_BODY}"
 
-  gh pr edit "$PR_NUMBER" --body "$NEW_BODY"
+  # Use REST API to update the PR body (avoids gh pr edit GraphQL issues)
+  BODY_JSON=$(mktemp)
+  # Use jq to properly escape the body string
+  printf '%s' "$NEW_BODY" | jq -Rs '{"body": .}' > "$BODY_JSON"
+  gh api "repos/${REPO}/pulls/${PR_NUMBER}" -X PATCH --input "$BODY_JSON" --silent
+  rm -f "$BODY_JSON"
   echo "PR #${PR_NUMBER} body updated with screenshot."
 fi
 
