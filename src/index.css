@@ -44,7 +44,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* chess board square colors (cool blue-gray shifted) */
+  /* chess board square colors (cool blue-gray) */
   --color-sq-light: #8e96a0;
   --color-sq-dark: #262a30;
   --color-sq-selected: #6b9e3a;
