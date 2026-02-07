@@ -12,15 +12,41 @@ description: Review and merge open PRs into master in creation order, resolving 
 
 Review and merge open PRs into master **in the order they were created** (oldest first). For each PR:
 
-### 1. Review
+### 1. Review (via sub-agent)
 
-- Read the PR diff: `gh pr diff <number>`
-- Read the PR description: `gh pr view <number>`
-- Evaluate the changes: does the code look correct, reasonable, and safe?
+Delegate the review to the **pr-reviewer** sub-agent so it runs in a **fresh context window** with no prior conversation history. Use the Task tool like this:
 
-### 2. Decide
+```
+Task tool call:
+  subagent_type: "general-purpose"
+  model: "opus"
+  prompt: |
+    You are a PR reviewer for the chess-game project at /home/jaime/Desktop/chess_game_workspace/chess_game.
 
-- **If the PR looks good**: approve it by triggering the Approve PR workflow, then proceed to merge (step 3):
+    Review PR #<number> by following these steps:
+
+    1. Read the PR metadata:
+       gh pr view <number> --json title,body,files --jq '{title: .title, body: .body, files: [.files[].path]}'
+
+    2. Read the full diff:
+       gh pr diff <number>
+
+    3. Read CLAUDE.md for project conventions.
+
+    4. If needed, read specific source files for additional context.
+
+    Evaluate for: correctness, safety, style/conventions, completeness (CLAUDE.md updates if needed), and no regressions.
+
+    Your response MUST start with either APPROVE or REQUEST_CHANGES on the first line, followed by your reasoning. Be concise but specific.
+```
+
+Parse the sub-agent's response:
+- First line will be `APPROVE` or `REQUEST_CHANGES`
+- Remaining lines are the reasoning/explanation
+
+### 2. Act on the verdict
+
+- **If APPROVE**: trigger the Approve PR workflow, then proceed to merge (step 3):
   ```
   gh workflow run "Approve PR" -f pr-number=<number>
   ```
@@ -28,9 +54,9 @@ Review and merge open PRs into master **in the order they were created** (oldest
   ```
   sleep 10 && gh pr view <number> --json reviews --jq '.reviews[] | "\(.author.login): \(.state)"'
   ```
-- **If the PR has problems**: request changes by triggering the Request Changes workflow with a review comment explaining the issues, then **skip** this PR and move on to the next one:
+- **If REQUEST_CHANGES**: trigger the Request Changes workflow with the sub-agent's reasoning as the body, then **skip** this PR and move on to the next one:
   ```
-  gh workflow run "Request Changes" -f pr-number=<number> -f body="<explanation of what needs fixing>"
+  gh workflow run "Request Changes" -f pr-number=<number> -f body="<reasoning from sub-agent>"
   ```
 
 ### 3. Merge
