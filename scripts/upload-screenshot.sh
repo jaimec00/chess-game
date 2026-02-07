@@ -2,13 +2,43 @@
 #
 # Upload a screenshot PNG to the pr-screenshots orphan branch and embed it in a PR body.
 #
-# Usage: bash scripts/upload-screenshot.sh <image-path> <pr-number>
+# Usage: bash scripts/upload-screenshot.sh <image-path> <pr-number> [--label <name>]
+#
+# The optional --label flag adds a suffix to the filename (e.g. pr-30-landing.png)
+# and uses it as the image caption. This allows multiple screenshots per PR.
 #
 
 set -euo pipefail
 
-IMAGE_PATH="${1:?Usage: upload-screenshot.sh <image-path> <pr-number>}"
-PR_NUMBER="${2:?Usage: upload-screenshot.sh <image-path> <pr-number>}"
+IMAGE_PATH=""
+PR_NUMBER=""
+LABEL=""
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --label)
+      LABEL="${2:?--label requires a value}"
+      shift 2
+      ;;
+    *)
+      if [ -z "$IMAGE_PATH" ]; then
+        IMAGE_PATH="$1"
+      elif [ -z "$PR_NUMBER" ]; then
+        PR_NUMBER="$1"
+      else
+        echo "Error: unexpected argument: $1" >&2
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$IMAGE_PATH" ] || [ -z "$PR_NUMBER" ]; then
+  echo "Usage: upload-screenshot.sh <image-path> <pr-number> [--label <name>]" >&2
+  exit 1
+fi
 
 if [ ! -f "$IMAGE_PATH" ]; then
   echo "Error: file not found: $IMAGE_PATH" >&2
@@ -17,7 +47,14 @@ fi
 
 REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
 BRANCH="pr-screenshots"
-FILENAME="pr-${PR_NUMBER}.png"
+
+if [ -n "$LABEL" ]; then
+  FILENAME="pr-${PR_NUMBER}-${LABEL}.png"
+  ALT_TEXT="$LABEL"
+else
+  FILENAME="pr-${PR_NUMBER}.png"
+  ALT_TEXT="screenshot"
+fi
 
 echo "Repo: $REPO"
 echo "Uploading $IMAGE_PATH as $FILENAME to branch $BRANCH..."
@@ -84,36 +121,60 @@ echo "Uploaded ${FILENAME} to ${BRANCH}."
 IMAGE_URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}/${FILENAME}"
 echo "Image URL: ${IMAGE_URL}"
 
-# --- Prepend screenshot section to PR body ---
+# --- Update the PR body with the screenshot ---
 
+IMAGE_LINE="![${ALT_TEXT}](${IMAGE_URL})"
 CURRENT_BODY=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.body')
 
-if echo "$CURRENT_BODY" | grep -q '## Screenshot'; then
-  echo "PR body already contains a screenshot section — skipping."
+if echo "$CURRENT_BODY" | grep -qF "$IMAGE_URL"; then
+  echo "PR body already contains this image URL — skipping."
+elif echo "$CURRENT_BODY" | grep -q '## Screenshot'; then
+  # Append the new image after the existing ## Screenshot heading and any existing images
+  # Find the screenshot section and append the new image after the last image line in it
+  NEW_BODY=$(echo "$CURRENT_BODY" | awk -v img="$IMAGE_LINE" '
+    /^## Screenshot/ { in_section=1; print; next }
+    in_section && /^!\[/ { if (hold != "") { printf "%s", hold; hold="" } last_img=NR; print; next }
+    in_section && !/^!\[/ && !/^[[:space:]]*$/ { if (hold != "") { printf "%s", hold; hold="" } if (!appended) { print img; print ""; appended=1 } in_section=0; print; next }
+    in_section && /^[[:space:]]*$/ { hold=hold $0 "\n"; next }
+    {
+      if (hold != "") {
+        if (!appended && !in_section) { printf "%s", hold; print img; print ""; appended=1 }
+        else { printf "%s", hold }
+        hold=""
+      }
+      print
+    }
+    END { if (hold != "" || (in_section && !appended)) { print img; print ""; printf "%s", hold } }
+  ')
+
+  BODY_JSON=$(mktemp)
+  printf '%s' "$NEW_BODY" | jq -Rs '{"body": .}' > "$BODY_JSON"
+  gh api "repos/${REPO}/pulls/${PR_NUMBER}" -X PATCH --input "$BODY_JSON" --silent
+  rm -f "$BODY_JSON"
+  echo "PR #${PR_NUMBER} body updated — appended screenshot to existing section."
 else
   NEW_BODY="## Screenshot
 
-![PR Screenshot](${IMAGE_URL})
+${IMAGE_LINE}
 
 ${CURRENT_BODY}"
 
-  # Use REST API to update the PR body (avoids gh pr edit GraphQL issues)
   BODY_JSON=$(mktemp)
   printf '%s' "$NEW_BODY" | jq -Rs '{"body": .}' > "$BODY_JSON"
   gh api "repos/${REPO}/pulls/${PR_NUMBER}" -X PATCH --input "$BODY_JSON" --silent
   rm -f "$BODY_JSON"
   echo "PR #${PR_NUMBER} body updated with screenshot."
+fi
 
-  # jq -Rs can escape ! to \! which breaks GitHub image markdown rendering.
-  # Verify and fix if needed.
-  UPDATED_BODY=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.body')
-  if echo "$UPDATED_BODY" | grep -q '\\!'; then
-    echo "Fixing escaped \\! in PR body..."
-    FIX_JSON=$(mktemp)
-    printf '%s' "$UPDATED_BODY" | sed 's/\\!/!/g' | jq -Rs '{"body": .}' > "$FIX_JSON"
-    gh api "repos/${REPO}/pulls/${PR_NUMBER}" -X PATCH --input "$FIX_JSON" --silent
-    rm -f "$FIX_JSON"
-  fi
+# jq -Rs can escape ! to \! which breaks GitHub image markdown rendering.
+# Verify and fix if needed.
+UPDATED_BODY=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.body')
+if echo "$UPDATED_BODY" | grep -q '\\!'; then
+  echo "Fixing escaped \\! in PR body..."
+  FIX_JSON=$(mktemp)
+  printf '%s' "$UPDATED_BODY" | sed 's/\\!/!/g' | jq -Rs '{"body": .}' > "$FIX_JSON"
+  gh api "repos/${REPO}/pulls/${PR_NUMBER}" -X PATCH --input "$FIX_JSON" --silent
+  rm -f "$FIX_JSON"
 fi
 
 echo "Done."
