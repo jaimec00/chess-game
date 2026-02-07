@@ -1,6 +1,6 @@
 ---
 name: merge-prs
-description: Merge open PRs into master in creation order, resolving any merge conflicts along the way.
+description: Review and merge open PRs into master in creation order, resolving any merge conflicts along the way.
 disable-model-invocation: true
 ---
 
@@ -11,18 +11,42 @@ disable-model-invocation: true
 
 ## Instructions
 
-Merge all open PRs into master **in the order they were created** (oldest first). For each PR:
+Review and merge open PRs into master **in the order they were created** (oldest first). For each PR:
 
-1. Attempt `gh pr merge <number> --merge --delete-branch`
-2. If it fails due to merge conflicts:
-   a. `git fetch origin master && git pull origin master`
-   b. `git fetch origin <branch-name>`
-   c. `git merge FETCH_HEAD --no-commit --no-ff`
-   d. Read conflicted files, resolve all conflicts (keep content from both sides where appropriate)
-   e. `git add` resolved files, then `git commit` and `git push origin master`
-   f. The PR should auto-close once its commits are in master
-3. After each merge, verify it succeeded before moving to the next PR
+### 1. Review
 
-If `$ARGUMENTS` is provided, treat it as a comma-separated list of PR numbers to merge (still in order). Otherwise merge all open PRs.
+- Read the PR diff: `gh pr diff <number>`
+- Read the PR description: `gh pr view <number>`
+- Evaluate the changes: does the code look correct, reasonable, and safe?
 
-Report a summary at the end: which PRs were merged, which had conflicts, and the final state.
+### 2. Decide
+
+- **If the PR looks good**: approve it with `gh pr review <number> --approve --body "<brief reason>"`, then proceed to merge (step 3).
+- **If the PR has problems**: leave a comment explaining the issues with `gh pr review <number> --request-changes --body "<explanation of what needs fixing>"`, then **skip** this PR and move on to the next one.
+
+### 3. Merge
+
+- Attempt `gh pr merge <number> --merge --delete-branch`
+- If it fails due to merge conflicts:
+  a. `git fetch origin master && git pull origin master`
+  b. `git fetch origin <branch-name>`
+  c. `git merge FETCH_HEAD --no-commit --no-ff`
+  d. Read conflicted files, resolve all conflicts (keep content from both sides where appropriate)
+  e. `git add` resolved files, then `git commit` and `git push origin master`
+  f. The PR should auto-close once its commits are in master
+
+### 4. Sync
+
+After each successful merge, pull from origin to keep local state in sync:
+
+```
+git fetch origin master && git pull origin master
+```
+
+Then verify the merge succeeded before moving to the next PR.
+
+---
+
+If `$ARGUMENTS` is provided, treat it as a comma-separated list of PR numbers to review and merge (still in order). Otherwise process all open PRs.
+
+Report a summary at the end: which PRs were approved and merged, which were skipped (and why), which had conflicts, and the final state.
