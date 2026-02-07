@@ -1,0 +1,31 @@
+name: Request Changes
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr-number:
+        description: "Pull request number"
+        required: true
+        type: number
+      body:
+        description: "Review comment explaining what needs to change"
+        required: true
+        type: string
+
+jobs:
+  request-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Submit request-changes review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ inputs.pr-number }},
+              event: 'REQUEST_CHANGES',
+              body: `${{ inputs.body }}`
+            });
