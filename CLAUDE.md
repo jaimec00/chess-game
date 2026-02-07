@@ -134,3 +134,4 @@ node_modules/.bin/vite          # dev server
 - **Commits**: short lowercase messages (e.g. `add move timer`, `fix castling bug`).
 - **Commit & push freely** — no need to ask before committing or pushing.
 - **Feature branches + PRs** — create a branch per feature/fix and open a PR to merge into `master`. Don't commit directly to `master` for new work.
+- **Git worktrees** — never work on `master` directly. Use `git worktree add` to create a worktree for each branch, do all work there, then commit, push, and open a PR with `gh pr create`. Remove the worktree after the PR is created.
