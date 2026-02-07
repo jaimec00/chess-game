@@ -180,6 +180,7 @@ node_modules/.bin/vite          # dev server
 - **Feature branches + PRs** — create a branch per feature/fix and open a PR to merge into `master`. Don't commit directly to `master` for new work. This applies to **all** changes — code, docs, config, CLAUDE.md updates, everything. No exceptions.
 - **Git worktrees** — never work on `master` directly. Create the branch and worktree **first**, then do all work inside the worktree. Never make changes in the main repo directory and copy them over — always start from the worktree. Use `git -C <worktree-path>` for all git commands (never `cd` into the worktree). When done, commit, push, open a PR with `gh pr create`, then remove the worktree.
 - **Always review before merging** — never merge a PR without reviewing it first. Read the diff, evaluate the changes, and approve via the workflow dispatch before merging. This applies whether merging a single PR or batch-merging with `/merge-prs`. No exceptions.
+- **Squash merge only** — the repo is configured to only allow **squash merges** (merge commits and rebase merges are disabled). Use `gh pr merge --squash` (not `--merge` or `--rebase`). This keeps master history clean with one commit per PR.
 - **Branch cleanup** — the repo has **auto-delete head branches** enabled, so GitHub deletes remote branches automatically after a PR is merged. Local branches should be deleted after their PR is merged or closed (`git branch -d <branch>` and `git remote prune origin`).
 
 ---
