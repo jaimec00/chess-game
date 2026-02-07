@@ -135,3 +135,39 @@ node_modules/.bin/vite          # dev server
 - **Commit & push freely** — no need to ask before committing or pushing.
 - **Feature branches + PRs** — create a branch per feature/fix and open a PR to merge into `master`. Don't commit directly to `master` for new work.
 - **Git worktrees** — never work on `master` directly. Use `git worktree add` to create a worktree for each branch, do all work there, then commit, push, and open a PR with `gh pr create`. Remove the worktree after the PR is created.
+
+---
+
+### PR screenshots
+
+Two scripts automate capturing a PNG of the running game and attaching it to a pull request.
+
+**`scripts/screenshot.mjs`** — Builds the app with Vite, starts `vite preview` on port 4173, launches headless Brave via `puppeteer-core`, waits for the `.board` selector + fonts + a 500ms settle, and saves a 2x-resolution PNG. Usage:
+
+```bash
+node scripts/screenshot.mjs [output-path]   # default: /tmp/chess-screenshot.png
+```
+
+**`scripts/upload-screenshot.sh`** — Uploads the PNG to a `pr-screenshots` orphan branch on GitHub (via Contents API) and prepends a `## Screenshot` section with the image to the PR body. Creates the orphan branch automatically on first run. Usage:
+
+```bash
+bash scripts/upload-screenshot.sh <image-path> <pr-number>
+```
+
+**Automation rule** — when a PR touches any of these paths, capture and attach a screenshot before (or right after) creating the PR:
+
+- `src/components/**/*.{jsx,css}`
+- `src/App.{jsx,css}`
+- `src/assets/**`
+- `index.html`
+
+**Full workflow example:**
+
+```bash
+export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+node scripts/screenshot.mjs /tmp/chess-screenshot.png
+gh pr create --title "…" --body "…"
+bash scripts/upload-screenshot.sh /tmp/chess-screenshot.png <pr-number>
+```
+
+The screenshot is never committed to the feature branch — it lives only on the `pr-screenshots` orphan branch.
