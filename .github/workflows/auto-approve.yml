@@ -1,11 +1,19 @@
-name: Auto approve
+name: Approve PR
 
-on: pull_request_target
+on:
+  workflow_dispatch:
+    inputs:
+      pr-number:
+        description: "Pull request number to approve"
+        required: true
+        type: number
 
 jobs:
-  auto-approve:
+  approve:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
       - uses: hmarr/auto-approve-action@v4
+        with:
+          pull-request-number: ${{ inputs.pr-number }}
