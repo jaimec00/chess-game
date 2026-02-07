@@ -133,8 +133,8 @@ elif echo "$CURRENT_BODY" | grep -q '## Screenshot'; then
   # Find the screenshot section and append the new image after the last image line in it
   NEW_BODY=$(echo "$CURRENT_BODY" | awk -v img="$IMAGE_LINE" '
     /^## Screenshot/ { in_section=1; print; next }
-    in_section && /^!\[/ { last_img=NR; print; next }
-    in_section && !/^!\[/ && !/^[[:space:]]*$/ { if (!appended) { print img; print ""; appended=1 } in_section=0; print; next }
+    in_section && /^!\[/ { if (hold != "") { printf "%s", hold; hold="" } last_img=NR; print; next }
+    in_section && !/^!\[/ && !/^[[:space:]]*$/ { if (hold != "") { printf "%s", hold; hold="" } if (!appended) { print img; print ""; appended=1 } in_section=0; print; next }
     in_section && /^[[:space:]]*$/ { hold=hold $0 "\n"; next }
     {
       if (hold != "") {
