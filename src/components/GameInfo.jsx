@@ -20,10 +20,10 @@ export default function GameInfo({ gameState, isThinking, onNewGame }) {
   return (
     <Card className="min-w-[260px] max-w-[290px] self-center bg-white/[0.05] backdrop-blur-xl border-white/10 shadow-xl max-md:min-w-0 max-md:max-w-none max-md:w-full max-md:flex-row max-md:flex-wrap max-md:items-center">
       <CardHeader className="max-md:flex-1 max-md:min-w-[120px]">
-        <CardTitle className="font-display text-[22px] font-bold tracking-[3px] uppercase text-gold">
+        <CardTitle className="font-ocr text-[22px] tracking-[3px] uppercase text-gold">
           Chess
         </CardTitle>
-        <CardDescription className="text-xs tracking-[1.5px] uppercase text-muted-foreground font-medium">
+        <CardDescription className="font-ocr text-xs tracking-[1.5px] uppercase text-muted-foreground">
           Player vs Engine
         </CardDescription>
       </CardHeader>
@@ -38,15 +38,15 @@ export default function GameInfo({ gameState, isThinking, onNewGame }) {
               ? 'bg-[#e8e0d0] shadow-[0_0_6px_rgba(220,200,160,0.3)]'
               : 'bg-[#3a3232] border border-[#4a4040]'
           )} />
-          <span className="text-[15px] font-semibold text-card-foreground">{statusText}</span>
+          <span className="text-[14px] font-ocr text-card-foreground">{statusText}</span>
         </div>
         {status === 'check' && (
-          <Badge className="self-start bg-destructive/80 text-[#f0c8b8] border-none text-[11px] font-bold tracking-[2px] uppercase rounded">
+          <Badge className="self-start bg-destructive/80 text-[#f0c8b8] border-none text-[11px] font-ocr tracking-[2px] uppercase rounded">
             CHECK
           </Badge>
         )}
         {isThinking && (
-          <div className="flex items-center gap-2 text-muted-foreground text-[13px] italic">
+          <div className="flex items-center gap-2 text-muted-foreground text-[13px] font-ocr">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-muted-foreground animate-dots-pulse" />
             Engine thinking...
           </div>
@@ -65,7 +65,7 @@ export default function GameInfo({ gameState, isThinking, onNewGame }) {
       <CardFooter>
         <Button
           variant="outline"
-          className="w-full font-display text-[13px] font-bold tracking-[1.5px] uppercase text-card-foreground bg-white/[0.04] border-white/10 hover:bg-white/[0.08] hover:border-white/20 hover:text-foreground active:translate-y-px"
+          className="w-full font-ocr text-[13px] tracking-[1.5px] uppercase text-card-foreground bg-white/[0.04] border-white/10 hover:bg-white/[0.08] hover:border-white/20 hover:text-foreground active:translate-y-px"
           onClick={onNewGame}
         >
           New Game
@@ -82,8 +82,8 @@ function CapturedPieces({ label, pieces }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <span className="text-xs uppercase tracking-[1px] text-muted-foreground font-semibold">{label}</span>
-        {totalValue > 0 && <span className="text-[13px] font-bold text-gold-dim font-display">+{totalValue / 100}</span>}
+        <span className="text-xs uppercase tracking-[1px] text-muted-foreground font-ocr">{label}</span>
+        {totalValue > 0 && <span className="text-[13px] text-gold-dim font-ocr">+{totalValue / 100}</span>}
       </div>
       <div className="flex flex-wrap gap-0.5 min-h-7 items-center">
         {sorted.length === 0
