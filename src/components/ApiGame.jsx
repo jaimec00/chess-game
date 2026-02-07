@@ -7,7 +7,7 @@ import ApiKeyInput from './ApiKeyInput.jsx';
 import { WHITE, BLACK } from '../engine/constants.js';
 import { getLegalMoves } from '../engine/moves.js';
 import { createInitialGameState, makeMove } from '../engine/gameState.js';
-import { moveToSAN, sanToMove, moveHistoryToString } from '../engine/notation.js';
+import { moveToSAN, sanToMove, moveHistoryToString, boardToDescription } from '../engine/notation.js';
 import { getProvider, getDefaultModel, PROVIDERS } from '../services/llm/provider.js';
 import { getApiKey, setApiKey, clearApiKey } from '../services/llm/apiKeyStore.js';
 import { SYSTEM_PROMPT, buildUserMoveMessage, buildFirstMoveMessage, buildIllegalMoveMessage, parseLLMResponse } from '../services/llm/prompt.js';
@@ -84,15 +84,25 @@ export default function ApiGame() {
           { role: 'player', type: 'move', content: lastMoveSAN, moveSAN: lastMoveSAN },
         ]);
 
-        // Build conversation messages
+        // Store conversation history without board state
         const newConvHistory = [
           ...conversationHistoryRef.current,
           { role: 'user', content: userMsg },
         ];
 
+        // Append current board state only to the last user message for the API call
+        const boardState = boardToDescription(gameState);
+        const convForApi = [
+          ...newConvHistory.slice(0, -1),
+          { role: 'user', content: `${userMsg}\n\nBoard:\n${boardState}` },
+        ];
+
         let attempts = 0;
         let moveFound = false;
-        let currentConv = newConvHistory;
+        // convForApi has board state in the last user message — used for API calls
+        // newConvHistory has no board state — used for persistent storage
+        let currentConv = convForApi;
+        let storedConv = newConvHistory;
 
         while (attempts < MAX_RETRIES && !moveFound) {
           attempts++;
@@ -104,6 +114,7 @@ export default function ApiGame() {
             // No move parsed from response
             const feedback = 'I could not parse a move from your response. Please respond with your move in SAN notation on the first line, then a blank line, then a comment.';
             currentConv = [...currentConv, { role: 'assistant', content: responseText }, { role: 'user', content: feedback }];
+            storedConv = [...storedConv, { role: 'assistant', content: responseText }, { role: 'user', content: feedback }];
             continue;
           }
 
@@ -118,9 +129,8 @@ export default function ApiGame() {
             // Generate proper SAN for display
             const displaySAN = moveToSAN(gameState, validMove);
 
-            // Update conversation history with the successful response
-            const finalConv = [...currentConv, { role: 'assistant', content: responseText }];
-            conversationHistoryRef.current = finalConv;
+            // Store conversation history without board state
+            conversationHistoryRef.current = [...storedConv, { role: 'assistant', content: responseText }];
 
             // Add LLM move to chat
             setChatMessages(prev => [
@@ -140,6 +150,7 @@ export default function ApiGame() {
             ]);
 
             currentConv = [...currentConv, { role: 'assistant', content: responseText }, { role: 'user', content: feedback }];
+            storedConv = [...storedConv, { role: 'assistant', content: responseText }, { role: 'user', content: feedback }];
           }
         }
 
@@ -148,7 +159,7 @@ export default function ApiGame() {
             ...prev,
             { role: 'system', type: 'error', content: `Failed to get a legal move after ${MAX_RETRIES} attempts. Try making another move or start a new game.` },
           ]);
-          conversationHistoryRef.current = currentConv;
+          conversationHistoryRef.current = storedConv;
         }
       } catch (err) {
         const errorMsg = err.message || 'Unknown error';
