@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './components/LandingPage.jsx';
 import Game from './components/Game.jsx';
+import ApiGame from './components/ApiGame.jsx';
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/play" element={<Game />} />
+        <Route path="/play/api" element={<ApiGame />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
