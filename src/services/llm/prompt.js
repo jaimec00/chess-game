@@ -1,6 +1,3 @@
-import { boardToDescription, moveHistoryToString, moveToSAN } from '../../engine/notation.js';
-import { getAllLegalMoves } from '../../engine/moves.js';
-
 export const SYSTEM_PROMPT = `You are playing chess as Black against a human player. You are a confident, witty opponent who provides brief commentary on each move.
 
 RESPONSE FORMAT — you MUST follow this exactly:
@@ -27,33 +24,19 @@ Nf6+
 Your king looks a little nervous. Good.
 
 IMPORTANT:
-- You will be given the board state and full move history to help you find a legal move.
-- If told your move was illegal, carefully re-read the position and pick a DIFFERENT legal move from the list provided.
+- If told your move was illegal, pick a DIFFERENT move.
 - Never repeat an illegal move you already tried.`;
 
-export function buildUserMoveMessage(san, gameState) {
-  const boardDesc = boardToDescription(gameState);
-  const history = moveHistoryToString(gameState);
-
-  let msg = `My move: ${san}\n\nCurrent position:\n${boardDesc}`;
-  if (history) msg += `\n\nMove history: ${history}`;
-  msg += '\n\nYour turn (Black).';
-
-  return msg;
+export function buildUserMoveMessage(san) {
+  return `My move: ${san}`;
 }
 
-export function buildFirstMoveMessage(gameState) {
-  const boardDesc = boardToDescription(gameState);
-  return `The game just started. Here is the current position after White's first move:\n${boardDesc}\n\nI'm White, you're Black. Your turn.`;
+export function buildFirstMoveMessage(san) {
+  return `The game just started. My first move: ${san}. Your turn.`;
 }
 
-export function buildIllegalMoveMessage(attempted, gameState) {
-  const legalMoves = getAllLegalMoves(gameState, gameState.turn);
-  const legalSANs = legalMoves.map(m => moveToSAN(gameState, m));
-  // Deduplicate (promotion variants may generate duplicates without piece specified)
-  const unique = [...new Set(legalSANs)];
-
-  return `"${attempted}" is not a legal move. Here are all legal moves: ${unique.join(', ')}\n\nPlease pick one of these moves. Remember: first line is your move in SAN, then a blank line, then a short comment.`;
+export function buildIllegalMoveMessage(attempted) {
+  return `"${attempted}" is not a legal move. Please pick a different move. Remember: first line is your move in SAN, then a blank line, then a short comment.`;
 }
 
 export function parseLLMResponse(text) {
