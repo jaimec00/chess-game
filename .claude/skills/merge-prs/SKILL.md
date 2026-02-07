@@ -37,7 +37,7 @@ Parse the sub-agent's response:
 
 ### 3. Merge
 
-- Attempt `gh pr merge <number> --merge --delete-branch`
+- Attempt `gh pr merge <number> --squash --delete-branch`
 - If it fails due to merge conflicts:
   a. `git fetch origin master && git pull origin master`
   b. `git fetch origin <branch-name>`
