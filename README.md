@@ -1,16 +1,41 @@
-# React + Vite
+# chess rot
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A browser chess game — play as white against a local AI or an LLM opponent. Built from scratch with React, Vite, and Tailwind CSS. No external chess libraries.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Full chess rules** — castling, en passant, pawn promotion, check/checkmate/stalemate, 50-move rule, threefold repetition, insufficient material draws
+- **Local AI** — minimax with alpha-beta pruning (depth 3), runs entirely in the browser
+- **LLM mode** — bring your own API key and play against Claude (Haiku or Sonnet) via the Anthropic Messages API
+- **Dark glassmorphism UI** — semi-transparent panels, backdrop blur, blue-gray board tones, cburnett SVG pieces
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19 + Vite 7
+- Tailwind CSS v4 + shadcn/ui
+- react-router-dom
+- No chess engine dependencies — all move generation, validation, and AI evaluation is hand-written
 
-## Expanding the ESLint configuration
+## Getting started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:5173`. Choose **new game (local)** to play against the built-in AI, or **new game (api)** to play against an LLM (requires an Anthropic API key).
+
+## Project structure
+
+```
+src/
+├── engine/          # Pure JS chess engine (moves, rules, AI, notation)
+├── services/llm/    # LLM API integration (Anthropic provider, prompt, key storage)
+├── components/      # React UI (board, game, chat, landing page, shadcn primitives)
+├── assets/pieces/   # cburnett SVG piece set (CC BY-SA 3.0)
+└── index.css        # Tailwind entry + theme tokens + animations
+```
+
+## License
+
+Piece artwork: [cburnett](https://en.wikipedia.org/wiki/User:Cburnett) SVG set from lichess.org, licensed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
