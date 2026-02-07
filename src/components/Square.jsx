@@ -7,10 +7,10 @@ export default function Square({ row, col, piece, isSelected, isLegalMove, isLas
   return (
     <div
       className={cn(
-        'w-full aspect-square flex items-center justify-center relative cursor-pointer select-none transition-colors duration-[120ms] group',
+        'w-full aspect-square flex items-center justify-center relative cursor-pointer select-none transition-all duration-150 group',
         isDark ? 'bg-sq-dark' : 'bg-sq-light',
         isLastMove && (isDark ? '!bg-sq-lastmove-dark' : '!bg-sq-lastmove-light'),
-        isSelected && '!bg-sq-selected shadow-[inset_0_0_14px_rgba(0,0,0,0.2)]',
+        isSelected && '!bg-sq-selected shadow-[inset_0_0_14px_rgba(0,0,0,0.2),inset_0_0_20px_rgba(80,140,60,0.15)]',
         isCheck && '!bg-[radial-gradient(ellipse_at_center,rgba(192,40,0,0.56)_0%,rgba(155,26,0,0.37)_40%,transparent_75%)] animate-check-throb'
       )}
       onClick={onClick}
@@ -23,7 +23,7 @@ export default function Square({ row, col, piece, isSelected, isLegalMove, isLas
       {isLegalMove && (
         piece
           ? <span className="absolute w-[88%] h-[88%] rounded-full border-4 border-black/[0.38] pointer-events-none box-border" />
-          : <span className="absolute w-[26%] h-[26%] rounded-full bg-black/[0.32] pointer-events-none shadow-[0_1px_4px_rgba(0,0,0,0.2)]" />
+          : <span className="absolute w-[26%] h-[26%] rounded-full bg-black/[0.32] backdrop-blur-[2px] pointer-events-none shadow-[0_1px_4px_rgba(0,0,0,0.2)]" />
       )}
     </div>
   );
