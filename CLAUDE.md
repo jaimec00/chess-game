@@ -133,5 +133,28 @@ node_modules/.bin/vite          # dev server
 - **Branches**: use prefixed names — `feature/…`, `fix/…`, `refactor/…`, etc.
 - **Commits**: short lowercase messages (e.g. `add move timer`, `fix castling bug`).
 - **Commit & push freely** — no need to ask before committing or pushing.
-- **Feature branches + PRs** — create a branch per feature/fix and open a PR to merge into `master`. Don't commit directly to `master` for new work.
+- **Feature branches + PRs** — create a branch per feature/fix and open a PR to merge into `master`. Don't commit directly to `master` for new work. This applies to **all** changes — code, docs, config, CLAUDE.md updates, everything. No exceptions.
 - **Git worktrees** — never work on `master` directly. Use `git worktree add` to create a worktree for each branch, do all work there, then commit, push, and open a PR with `gh pr create`. Remove the worktree after the PR is created.
+
+### Workspace layout
+
+The project lives inside `~/Desktop/chess_game_workspace/chess_game`. The parent directory `~/Desktop/chess_game_workspace/` is used for git worktrees — each worktree is created as a sibling of the `chess_game/` folder (e.g. `../my-feature/`). The `.claude/settings.local.json` includes `"additionalDirectories": ["../"]` so that file operations in sibling worktree directories are permitted without extra prompts.
+
+---
+
+### Keeping this file up to date
+
+**This file must always reflect the current state of the codebase.** Follow these rules:
+
+- Any change that adds, removes, or restructures files, scripts, dependencies, or conventions must include a corresponding update to this CLAUDE.md in the same commit.
+- When you discover a useful tip, gotcha, or workaround while working in this repo, add it to the appropriate section (or to "Tips & gotchas" below).
+- If a section becomes inaccurate, fix it — don't leave stale documentation.
+
+---
+
+### Tips & gotchas
+
+- **`gh pr edit` is broken** — the `gh` CLI (as of early 2026) returns exit code 1 on `gh pr edit` due to a deprecated Projects Classic GraphQL field, even though the underlying mutation sometimes succeeds. Use the REST API instead: `gh api repos/OWNER/REPO/pulls/N -X PATCH --input payload.json`.
+- **Large payloads via `gh api`** — passing large values (e.g. base64-encoded images) through `-f "field=VALUE"` will fail with "Argument list too long". Write the JSON body to a temp file and use `--input file.json` instead.
+- **Shell CWD + worktree removal** — if your shell's CWD is inside a worktree directory and that directory gets removed, all subsequent shell commands will fail. Always `cd` back to the main repo before removing a worktree.
+- **Brave headless** — Brave is installed at `/usr/bin/brave-browser` and works as a Chromium drop-in for puppeteer-core. Use `--no-sandbox --disable-setuid-sandbox --disable-gpu --disable-extensions` flags for headless screenshots.
