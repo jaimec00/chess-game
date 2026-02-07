@@ -80,7 +80,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_40%_50%,#333333_0%,#000000_70%)]">
+    <div className="h-screen w-screen flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_40%_50%,#444444_0%,#1a1a1a_40%,#000000_75%)]">
       <div className="flex gap-20 items-center justify-center w-full h-full p-6 max-md:flex-col max-md:gap-3 max-md:p-2">
         <Board
           gameState={gameState}
