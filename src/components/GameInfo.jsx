@@ -18,7 +18,9 @@ export default function GameInfo({ gameState, isThinking, onNewGame }) {
   }
 
   return (
-    <Card className="min-w-[320px] max-w-[360px] self-center bg-white/[0.05] backdrop-blur-xl border-white/10 shadow-xl max-md:min-w-0 max-md:max-w-none max-md:w-full max-md:flex-row max-md:flex-wrap max-md:items-center">
+    <Card className="relative min-w-[320px] max-w-[360px] self-center bg-white/[0.05] backdrop-blur-2xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden max-md:min-w-0 max-md:max-w-none max-md:w-full max-md:flex-row max-md:flex-wrap max-md:items-center">
+      {/* top-edge glass highlight */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.12] to-transparent pointer-events-none" />
       <CardHeader className="max-md:flex-1 max-md:min-w-[120px]">
         <CardTitle className="font-ocr text-[28px] font-bold tracking-[3px] uppercase text-gold">
           Chess
@@ -28,14 +30,14 @@ export default function GameInfo({ gameState, isThinking, onNewGame }) {
         </CardDescription>
       </CardHeader>
 
-      <div className="h-px bg-white/10 max-md:hidden" />
+      <div className="h-px mx-4 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent max-md:hidden" />
 
       <CardContent className="flex flex-col gap-3 max-md:flex-1 max-md:min-w-[140px]">
         <div className={cn('flex items-center gap-3', isGameOver && 'opacity-85')}>
           <span className={cn(
             'w-3 h-3 rounded-full shrink-0',
             turn === WHITE
-              ? 'bg-[#e8e0d0] shadow-[0_0_6px_rgba(220,200,160,0.3)]'
+              ? 'bg-[#e8e0d0] shadow-[0_0_8px_rgba(220,200,160,0.35),inset_0_0_2px_rgba(255,255,255,0.3)]'
               : 'bg-[#3a3232] border border-[#4a4040]'
           )} />
           <span className="text-[17px] font-ocr font-bold text-card-foreground">{statusText}</span>
@@ -53,19 +55,19 @@ export default function GameInfo({ gameState, isThinking, onNewGame }) {
         )}
       </CardContent>
 
-      <div className="h-px bg-white/10 max-md:hidden" />
+      <div className="h-px mx-4 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent max-md:hidden" />
 
       <CardContent className="flex flex-col gap-5 max-md:flex-1 max-md:min-w-[160px]">
         <CapturedPieces label="White captures" pieces={capturedPieces[BLACK]} />
         <CapturedPieces label="Black captures" pieces={capturedPieces[WHITE]} />
       </CardContent>
 
-      <div className="h-px bg-white/10 max-md:hidden" />
+      <div className="h-px mx-4 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent max-md:hidden" />
 
       <CardFooter>
         <Button
           variant="outline"
-          className="w-full font-ocr text-[15px] font-bold tracking-[1.5px] uppercase text-card-foreground bg-white/[0.04] border-white/10 hover:bg-white/[0.08] hover:border-white/20 hover:text-foreground active:translate-y-px"
+          className="w-full font-ocr text-[15px] font-bold tracking-[1.5px] uppercase text-card-foreground bg-white/[0.04] backdrop-blur-sm border-white/10 hover:bg-white/[0.10] hover:border-white/20 hover:text-foreground hover:shadow-[0_0_12px_rgba(100,140,200,0.08)] active:translate-y-px transition-all"
           onClick={onNewGame}
         >
           New Game
