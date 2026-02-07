@@ -35,9 +35,11 @@ Task tool call:
 
     4. If needed, read specific source files for additional context.
 
-    Evaluate for: correctness, safety, style/conventions, completeness (CLAUDE.md updates if needed), and no regressions.
+    Evaluate for: correctness, safety, style/conventions, completeness (CLAUDE.md updates if needed), documentation accuracy, and no regressions.
 
-    Your response MUST start with either APPROVE or REQUEST_CHANGES on the first line, followed by your reasoning. Be concise but specific.
+    Be STRICT. Every issue — no matter how small — must be fixed before approval. This includes wording nits, inaccurate or misleading comments/documentation, inconsistent terminology, and minor style issues. Do NOT approve with "minor observations" or "non-blocking notes." If you found something worth mentioning, REQUEST_CHANGES for it. The bar for APPROVE is zero issues.
+
+    Your response MUST start with either APPROVE or REQUEST_CHANGES on the first line, followed by your reasoning. If requesting changes, provide a numbered list of every issue.
 ```
 
 Parse the sub-agent's response:
