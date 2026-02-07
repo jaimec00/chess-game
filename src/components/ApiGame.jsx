@@ -7,7 +7,7 @@ import ApiKeyInput from './ApiKeyInput.jsx';
 import { WHITE, BLACK } from '../engine/constants.js';
 import { getLegalMoves } from '../engine/moves.js';
 import { createInitialGameState, makeMove } from '../engine/gameState.js';
-import { moveToSAN, sanToMove, boardToDescription, moveHistoryToString } from '../engine/notation.js';
+import { moveToSAN, sanToMove, moveHistoryToString } from '../engine/notation.js';
 import { getProvider, getDefaultModel, PROVIDERS } from '../services/llm/provider.js';
 import { getApiKey, setApiKey, clearApiKey } from '../services/llm/apiKeyStore.js';
 import { SYSTEM_PROMPT, buildUserMoveMessage, buildFirstMoveMessage, buildIllegalMoveMessage, parseLLMResponse } from '../services/llm/prompt.js';
@@ -71,20 +71,17 @@ export default function ApiGame() {
         const history = moveHistoryToString(gameState);
         const lastMoveSAN = history.split(/\s+/).filter(s => !s.includes('.')).pop() || '';
 
-        const boardDesc = boardToDescription(gameState);
         let userMsg;
         if (gameState.moveHistory.length === 1) {
-          // First move of the game
-          userMsg = buildFirstMoveMessage(gameState);
+          userMsg = buildFirstMoveMessage(lastMoveSAN);
         } else {
-          userMsg = buildUserMoveMessage(lastMoveSAN, gameState);
+          userMsg = buildUserMoveMessage(lastMoveSAN);
         }
 
         // Add player move to chat
         setChatMessages(prev => [
           ...prev,
           { role: 'player', type: 'move', content: lastMoveSAN, moveSAN: lastMoveSAN },
-          { role: 'llm', type: 'position', content: boardDesc },
         ]);
 
         // Build conversation messages
@@ -135,7 +132,7 @@ export default function ApiGame() {
             moveFound = true;
           } else {
             // Illegal move — send feedback
-            const feedback = buildIllegalMoveMessage(moveSAN, gameState);
+            const feedback = buildIllegalMoveMessage(moveSAN);
 
             setChatMessages(prev => [
               ...prev,
