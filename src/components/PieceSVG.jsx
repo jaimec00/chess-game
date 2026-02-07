@@ -26,7 +26,7 @@ export default function PieceSVG({ type, color }) {
     <img
       src={src}
       alt={`${color} ${type}`}
-      className="piece-svg"
+      className="w-full h-full"
       draggable={false}
     />
   );

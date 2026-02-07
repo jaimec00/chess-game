@@ -2,16 +2,20 @@
 
 ### Overview
 
-A complete browser chess game (~1,800 lines) — Player (white) vs AI (black) with full standard rules, built from scratch with React 18 + Vite. No external chess libraries.
+A complete browser chess game (~1,800 lines) — Player (white) vs AI (black) with full standard rules, built from scratch with React 19 + Vite + Tailwind CSS v4 + shadcn/ui. No external chess libraries.
 
 ```
 chess_game/
 ├── index.html              # Entry HTML, loads Google Fonts (Cinzel, Inter)
-├── package.json            # React 19, Vite 7
+├── package.json            # React 19, Vite 7, Tailwind v4, shadcn/ui
+├── jsconfig.json           # @/* path alias for shadcn imports
+├── components.json         # shadcn/ui configuration
 ├── src/
-│   ├── main.jsx            # React DOM mount
+│   ├── main.jsx            # React DOM mount + CSS import
+│   ├── index.css           # Tailwind entry point, theme tokens, keyframes
 │   ├── App.jsx             # Root component, state management, game loop
-│   ├── App.css             # Dark felt-table background, layout
+│   ├── lib/
+│   │   └── utils.js        # cn() helper (clsx + tailwind-merge)
 │   ├── assets/
 │   │   └── pieces/         # cburnett SVG piece set (CC BY-SA 3.0)
 │   │       ├── wK/Q/R/B/N/P.svg  # White pieces
@@ -24,12 +28,32 @@ chess_game/
 │   │   ├── gameState.js    # makeMove, check/checkmate/stalemate/draw detection
 │   │   └── ai.js           # Minimax + alpha-beta pruning (depth 3), positional evaluation
 │   └── components/
-│       ├── Board.jsx/css   # 3D perspective board with wood frame, coordinates
-│       ├── Square.jsx/css  # Individual square: highlights, hover, hints
+│       ├── ui/             # shadcn/ui primitives (Card, Button, Badge, Dialog)
+│       ├── Board.jsx       # 3D perspective board with glass frame, coordinates
+│       ├── Board.css       # Minimal CSS for 3D transforms + grid sizing (~48 lines)
+│       ├── Square.jsx      # Individual square: highlights, hover, hints (all Tailwind)
 │       ├── PieceSVG.jsx    # Renders cburnett piece SVGs as <img> elements
-│       ├── GameInfo.jsx/css # Status panel: turn, captures, controls
-│       └── PromotionModal.jsx/css  # Piece picker overlay (uses PieceSVG)
+│       ├── GameInfo.jsx    # Status panel using shadcn Card/Badge/Button
+│       └── PromotionModal.jsx  # Piece picker using shadcn Dialog
 ```
+
+---
+
+### Styling stack
+
+**Tailwind CSS v4** via `@tailwindcss/vite` — no PostCSS config, no `tailwind.config.js`. The Vite plugin handles everything.
+
+**shadcn/ui** — pre-built accessible components (Card, Button, Badge, Dialog) from `src/components/ui/`. These depend on Radix UI primitives, `clsx`, `tailwind-merge`, and `class-variance-authority`.
+
+**`cn()` helper** (`src/lib/utils.js`) — merges Tailwind classes with `clsx` + `tailwind-merge`. Used throughout components for conditional class application.
+
+**`src/index.css`** — Tailwind entry point. Contains:
+- `@import "tailwindcss"` + shadcn imports
+- `@theme inline { ... }` with custom tokens: board square colors (`sq-light`, `sq-dark`, etc.), accent gold, font families (`font-display`, `font-body`), custom animations (`check-throb`, `dots-pulse`)
+- `:root` CSS variables for the dark glassmorphism color scheme
+- `@keyframes` for check-throb and dots-pulse animations
+
+**Board.css** is the only remaining custom CSS file (~48 lines), used for things Tailwind can't express: 3D perspective transforms, `::after` pseudo-elements, CSS custom property `--board-size` with responsive media query overrides.
 
 ---
 
@@ -103,11 +127,15 @@ AI RESPONSE (useEffect on gameState.turn === BLACK):
 
 ### Visual architecture
 
-The board uses **CSS 3D perspective** (`perspective(1200px) rotateX(22deg)` as a transform function, not a rendering context) to create a tabletop viewing angle. A `::after` pseudo-element on the board frame renders a visible front edge. A blurred radial-gradient div beneath simulates a table shadow.
+The visual theme is **dark glassmorphism** — frosted glass cards, backdrop blur, semi-transparent layers, and a deep navy radial-gradient background.
 
-Pieces use the **cburnett SVG set** (`src/assets/pieces/`), the standard piece artwork from lichess.org (CC BY-SA 3.0 by Colin M.L. Burnett). `PieceSVG.jsx` imports all 12 SVGs and renders them as `<img>` elements. CSS `drop-shadow` filters on the piece wrapper cast shadows onto the board.
+The board uses **CSS 3D perspective** (`perspective(1200px) rotateX(22deg)` as a transform function, not a rendering context) to create a tabletop viewing angle. A `::after` pseudo-element on the board wrapper renders a visible front edge. A blurred radial-gradient div beneath simulates a table shadow. The board frame uses glassmorphism styling (`bg-white/[0.06] backdrop-blur-sm border border-white/10`).
 
-The info panel uses Cinzel serif for headings and Inter sans-serif for body, with a dark wood-toned card, gradient dividers, and a turn indicator dot (marble-textured radial gradient).
+Board squares use blue-gray tones (`bg-sq-light` #8a9bb4 / `bg-sq-dark` #4a5568) defined as Tailwind theme tokens. Selection, last-move, and check highlights are applied via conditional Tailwind classes with `cn()`.
+
+Pieces use the **cburnett SVG set** (`src/assets/pieces/`), the standard piece artwork from lichess.org (CC BY-SA 3.0 by Colin M.L. Burnett). `PieceSVG.jsx` imports all 12 SVGs and renders them as `<img>` elements. Tailwind `drop-shadow` utilities on the piece wrapper cast shadows onto the board.
+
+The info panel uses shadcn **Card** with glassmorphism (`bg-white/[0.05] backdrop-blur-xl border-white/10`), Cinzel serif headings via `font-display`, and gold accent color for the title. The promotion modal uses shadcn **Dialog** for accessible overlay with focus trapping.
 
 ---
 
@@ -176,7 +204,8 @@ bash scripts/upload-screenshot.sh <image-path> <pr-number>
 **Automation rule** — when a PR touches any of these paths, capture and attach a screenshot before (or right after) creating the PR:
 
 - `src/components/**/*.{jsx,css}`
-- `src/App.{jsx,css}`
+- `src/App.jsx`
+- `src/index.css`
 - `src/assets/**`
 - `index.html`
 
@@ -224,3 +253,7 @@ Custom slash-command skills live in `.claude/skills/<name>/SKILL.md`.
 - **Shell CWD + worktree removal** — if your shell's CWD is inside a worktree directory and that directory gets removed, all subsequent shell commands will fail. Always `cd` back to the main repo before removing a worktree.
 - **Brave headless** — Brave is installed at `/usr/bin/brave-browser` and works as a Chromium drop-in for puppeteer-core. Use `--no-sandbox --disable-setuid-sandbox --disable-gpu --disable-extensions` flags for headless screenshots.
 - **Always pull after merging PRs** — after merging a PR (via `gh pr merge` or manually), always run `git fetch origin master && git pull origin master` to keep local master in sync with remote. This prevents conflicts and stale state when merging subsequent PRs.
+- **Tailwind v4 + shadcn** — shadcn requires a CSS file with `@import "tailwindcss"` to detect the Tailwind config. Create `src/index.css` with the import before running `npx shadcn@latest init`.
+- **PR screenshot `!` escaping** — `upload-screenshot.sh` (and any manual `jq -Rs` pipeline) can escape `!` in `![image](url)` markdown to `\![image](url)`, causing GitHub to render a text link instead of an inline image. After uploading, verify the PR body with `gh api repos/OWNER/REPO/pulls/N --jq '.body' | head -5` and fix the escaped `\!` if needed.
+- **`jq --arg` vs `--rawfile` for large values** — `jq --arg varname "$LARGE_VALUE"` hits "Argument list too long" when the value exceeds shell arg limits (e.g. base64-encoded screenshots). Write the value to a temp file and use `jq --rawfile varname file` instead.
+- **`git worktree add` from a detached branch** — if you `git checkout feature-branch` on the main repo first and then try `git worktree add ../path feature-branch`, it fails because the branch is already checked out. Stay on `master` in the main repo and create the worktree directly from there.
