@@ -11,8 +11,9 @@ const PREVIEW_URL = `http://localhost:${PREVIEW_PORT}`;
 
 // Page definitions: route path + wait selector
 const PAGES = {
-  play:    { path: '/play',  selector: '.board' },
-  landing: { path: '/',      selector: 'h1' },
+  play:    { path: '/play',     selector: '.board' },
+  landing: { path: '/',         selector: 'h1' },
+  api:     { path: '/play/api', selector: '.board' },
 };
 
 // Parse args: [output-path] [--page <name>]
