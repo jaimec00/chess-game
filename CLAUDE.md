@@ -243,7 +243,7 @@ The project lives inside `~/Desktop/chess_game_workspace/chess_game`. The parent
 
 Custom sub-agent definitions live in `.claude/agents/<name>.md`. Sub-agents run in a **fresh context window** via the Task tool, with no access to the parent conversation's history.
 
-**`pr-reviewer`** — Reviews a single PR diff for correctness, safety, and adherence to project conventions. Returns a structured verdict: first line is `APPROVE` or `REQUEST_CHANGES`, followed by reasoning. Used by the `/merge-prs` skill to ensure each PR is reviewed independently (not influenced by the conversation that created the code).
+**`pr-reviewer`** — Reviews a single PR diff for correctness, safety, documentation accuracy, and adherence to project conventions. Enforces a strict zero-issues-before-approval bar: wording nits, misleading documentation, inconsistent terminology, and minor style issues all block approval. Returns a structured verdict: first line is `APPROVE` or `REQUEST_CHANGES`, followed by reasoning (numbered issue list for rejections). Used by the `/merge-prs` skill to ensure each PR is reviewed independently (not influenced by the conversation that created the code).
 
 ---
 
