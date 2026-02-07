@@ -18,14 +18,14 @@ export default function LandingPage() {
         <Button
           variant="outline"
           asChild
-          className="py-2.5 px-8 h-auto font-ocr text-sm text-white/70 bg-white/[0.03] backdrop-blur-sm border-white/[0.08] hover:border-white/[0.18] hover:text-white/90 hover:shadow-[0_0_20px_rgba(100,140,255,0.12)] transition-all"
+          className="py-3.5 px-10 h-auto font-ocr text-[15px] text-white/70 bg-white/[0.03] backdrop-blur-sm border-white/[0.08] hover:border-white/[0.18] hover:text-white/90 hover:shadow-[0_0_20px_rgba(100,140,255,0.12)] transition-all"
         >
           <Link to="/play">new game (local)</Link>
         </Button>
         <Button
           variant="outline"
           asChild
-          className="py-2.5 px-8 h-auto font-ocr text-sm text-white/70 bg-white/[0.03] backdrop-blur-sm border-white/[0.08] hover:border-white/[0.18] hover:text-white/90 hover:shadow-[0_0_20px_rgba(100,140,255,0.12)] transition-all"
+          className="py-3.5 px-10 h-auto font-ocr text-[15px] text-white/70 bg-white/[0.03] backdrop-blur-sm border-white/[0.08] hover:border-white/[0.18] hover:text-white/90 hover:shadow-[0_0_20px_rgba(100,140,255,0.12)] transition-all"
         >
           <Link to="/play/api">new game (api)</Link>
         </Button>

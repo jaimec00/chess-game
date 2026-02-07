@@ -18,7 +18,7 @@ export default function GameInfo({ gameState, isThinking, onNewGame }) {
   }
 
   return (
-    <Card className="relative min-w-[320px] max-w-[360px] self-center bg-white/[0.05] backdrop-blur-2xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden max-md:min-w-0 max-md:max-w-none max-md:w-full max-md:flex-row max-md:flex-wrap max-md:items-center">
+    <Card className="relative w-[380px] flex flex-col justify-between bg-white/[0.05] backdrop-blur-2xl border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.04)] overflow-hidden max-md:w-full max-md:flex-row max-md:flex-wrap max-md:items-center">
       {/* top-edge glass highlight */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.12] to-transparent pointer-events-none" />
       <CardHeader className="max-md:flex-1 max-md:min-w-[120px]">

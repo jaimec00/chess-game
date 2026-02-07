@@ -21,7 +21,7 @@
 }
 
 @media (min-width: 901px) {
-  .board { --board-size: min(82vh, calc(100vw - 480px)); }
+  .board { --board-size: min(82vh, calc(100vw - 520px)); }
 }
 
 @media (max-width: 900px) {
