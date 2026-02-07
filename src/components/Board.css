@@ -1,22 +1,14 @@
-/* ── 3D scene container ── */
+/* 3D scene padding */
 .board-scene {
-  flex-shrink: 0;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 20px 20px 60px;
 }
 
-/* ── tilted board group ── */
+/* tilted board — perspective as a transform function (no 3D rendering context) */
 .board-3d {
-  /* perspective as a transform function — no 3D rendering context,
-     so pointer events map correctly through the inverse transform */
   transform: perspective(1200px) rotateX(22deg);
-  position: relative;
 }
 
-/* simulated front edge (board thickness) via border + shadow */
+/* front-edge pseudo-element (board thickness) */
 .board-3d::after {
   content: '';
   position: absolute;
@@ -24,83 +16,12 @@
   left: 0;
   width: 100%;
   height: 14px;
-  background:
-    linear-gradient(
-      to bottom,
-      #3d2c1b 0%,
-      #2e1f10 30%,
-      #1a1008 100%
-    );
+  background: linear-gradient(to bottom, #1e2636 0%, #141a26 30%, #0b0e14 100%);
   border-radius: 0 0 4px 4px;
   pointer-events: none;
 }
 
-/* ── wooden frame around the squares ── */
-.board-frame {
-  display: flex;
-  align-items: stretch;
-  padding: 10px;
-  background:
-    linear-gradient(160deg, #4a3828 0%, #362618 40%, #2a1d12 100%);
-  border-radius: 4px;
-  /* wood grain texture */
-  background-image:
-    repeating-linear-gradient(
-      82deg,
-      transparent,
-      transparent 30px,
-      rgba(255,255,255,0.02) 30px,
-      rgba(255,255,255,0.02) 32px
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.06),
-    inset 0 -1px 0 rgba(0,0,0,0.3);
-}
-
-/* ── coordinate labels ── */
-.rank-labels {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  width: 20px;
-  flex-shrink: 0;
-}
-
-.rank-label {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 600;
-  color: #6b5740;
-  font-family: 'Cinzel', Georgia, serif;
-  opacity: 0.7;
-}
-
-.board-and-files {
-  display: flex;
-  flex-direction: column;
-}
-
-.file-labels {
-  display: flex;
-  height: 18px;
-  align-items: center;
-}
-
-.file-label {
-  flex: 1;
-  text-align: center;
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: lowercase;
-  color: #6b5740;
-  font-family: 'Cinzel', Georgia, serif;
-  opacity: 0.7;
-}
-
-/* ── the 8x8 grid ── */
+/* 8x8 grid with responsive sizing */
 .board {
   display: grid;
   grid-template-rows: repeat(8, 1fr);
@@ -108,9 +29,7 @@
   height: var(--board-size);
   width: var(--board-size);
   overflow: hidden;
-  box-shadow:
-    inset 0 0 0 1px rgba(0,0,0,0.4),
-    inset 0 2px 8px rgba(0,0,0,0.5);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4), inset 0 2px 8px rgba(0,0,0,0.5);
 }
 
 .board-row {
@@ -118,35 +37,12 @@
   grid-template-columns: repeat(8, 1fr);
 }
 
-/* ── shadow cast onto the table surface ── */
-.table-shadow {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  height: 40px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(0,0,0,0.5) 0%, transparent 70%);
-  filter: blur(16px);
-  pointer-events: none;
-}
-
-/* ── desktop: account for side panel ── */
 @media (min-width: 901px) {
-  .board {
-    --board-size: min(82vh, calc(100vw - 480px));
-  }
+  .board { --board-size: min(82vh, calc(100vw - 480px)); }
 }
 
-/* ── mobile ── */
 @media (max-width: 900px) {
-  .board-scene {
-    padding: 10px 10px 40px;
-  }
-  .board-3d {
-    transform: perspective(1200px) rotateX(16deg);
-  }
-  .board {
-    --board-size: min(70vh, 88vw);
-  }
+  .board-scene { padding: 10px 10px 40px; }
+  .board-3d { transform: perspective(1200px) rotateX(16deg); }
+  .board { --board-size: min(70vh, 88vw); }
 }

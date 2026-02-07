@@ -6,7 +6,6 @@ import { WHITE, BLACK } from './engine/constants.js';
 import { getLegalMoves } from './engine/moves.js';
 import { createInitialGameState, makeMove } from './engine/gameState.js';
 import { getBestMove } from './engine/ai.js';
-import './App.css';
 
 export default function App() {
   const [gameState, setGameState] = useState(createInitialGameState);
@@ -81,8 +80,8 @@ export default function App() {
   }, []);
 
   return (
-    <div className="app">
-      <div className="game-container">
+    <div className="h-screen w-screen flex items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_60%,#0f1420_0%,#0b0e14_70%)]">
+      <div className="flex gap-20 items-center justify-center w-full h-full p-6 max-md:flex-col max-md:gap-3 max-md:p-2">
         <Board
           gameState={gameState}
           selectedSquare={selectedSquare}

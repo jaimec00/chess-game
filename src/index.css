@@ -1,0 +1,120 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* chess board square colors */
+  --color-sq-light: #8a9bb4;
+  --color-sq-dark: #4a5568;
+  --color-sq-selected: #6b9e3a;
+  --color-sq-lastmove-light: #7a8fa8;
+  --color-sq-lastmove-dark: #3d5a80;
+  --color-sq-check: #c02800;
+
+  /* accent gold */
+  --color-gold: #d4a843;
+  --color-gold-dim: #8a7a55;
+
+  /* fonts */
+  --font-display: "Cinzel", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* custom animations */
+  --animate-check-throb: check-throb 1.2s ease-in-out infinite;
+  --animate-dots-pulse: dots-pulse 1.4s ease-in-out infinite;
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #0b0e14;
+  --foreground: #e0e4ec;
+  --card: rgba(255, 255, 255, 0.05);
+  --card-foreground: #d4c8b0;
+  --popover: rgba(255, 255, 255, 0.06);
+  --popover-foreground: #e0e4ec;
+  --primary: #d4a843;
+  --primary-foreground: #0b0e14;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #e0e4ec;
+  --muted: rgba(255, 255, 255, 0.06);
+  --muted-foreground: #7a8a9e;
+  --accent: rgba(255, 255, 255, 0.1);
+  --accent-foreground: #e0e4ec;
+  --destructive: #c02800;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #d4a843;
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: rgba(255, 255, 255, 0.04);
+  --sidebar-foreground: #e0e4ec;
+  --sidebar-primary: #d4a843;
+  --sidebar-primary-foreground: #0b0e14;
+  --sidebar-accent: rgba(255, 255, 255, 0.08);
+  --sidebar-accent-foreground: #e0e4ec;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #d4a843;
+}
+
+@keyframes check-throb {
+  0%, 100% { box-shadow: inset 0 0 10px rgba(192, 40, 0, 0.4); }
+  50% { box-shadow: inset 0 0 22px rgba(200, 40, 0, 0.7); }
+}
+
+@keyframes dots-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-body overflow-hidden;
+  }
+}
