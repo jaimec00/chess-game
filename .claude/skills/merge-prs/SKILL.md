@@ -1,7 +1,6 @@
 ---
 name: merge-prs
 description: Review and merge open PRs into master in creation order, resolving any merge conflicts along the way.
-disable-model-invocation: true
 ---
 
 ## Context
