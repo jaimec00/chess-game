@@ -2,7 +2,7 @@
 
 ### Overview
 
-A complete browser chess game (~1,700 lines) — Player (white) vs AI (black) with full standard rules, built from scratch with React 19 + Vite + Tailwind CSS v4 + shadcn/ui + react-router-dom. No external chess libraries.
+A complete browser chess game — Player (white) vs AI (black) with full standard rules, built from scratch with React 19 + Vite + Tailwind CSS v4 + shadcn/ui + react-router-dom. No external chess libraries. Two play modes: local minimax AI and LLM API (bring your own key).
 
 ```
 chess_game/
@@ -26,16 +26,26 @@ chess_game/
 │   │   ├── moves.js        # Move generation + legality filtering for all pieces
 │   │   ├── specialMoves.js # applyMove: castling, en passant, promotion, rights tracking
 │   │   ├── gameState.js    # makeMove, check/checkmate/stalemate/draw detection
-│   │   └── ai.js           # Minimax + alpha-beta pruning (depth 3), positional evaluation
+│   │   ├── ai.js           # Minimax + alpha-beta pruning (depth 3), positional evaluation
+│   │   └── notation.js     # Algebraic notation: SAN ↔ move conversion, board description
+│   ├── services/
+│   │   └── llm/
+│   │       ├── apiKeyStore.js  # localStorage read/write for per-provider API keys
+│   │       ├── provider.js     # Provider registry + Anthropic API sendMessage()
+│   │       └── prompt.js       # System prompt, message builders, response parser
 │   └── components/
-│       ├── ui/             # shadcn/ui primitives (Card, Button, Badge, Dialog)
-│       ├── LandingPage.jsx # "/" route — "chess rot" title + play button
+│       ├── ui/             # shadcn/ui primitives (Card, Button, Badge, Dialog, Input, Select, ScrollArea, Label)
+│       ├── LandingPage.jsx # "/" route — "chess rot" title + play buttons (local + api)
 │       ├── Game.jsx        # "/play" route — game state, handlers, board + info panel
+│       ├── ApiGame.jsx     # "/play/api" route — LLM game with chat + provider controls
 │       ├── Board.jsx       # Board with glass frame, coordinates
 │       ├── Board.css       # Grid sizing, inner shadow + responsive media queries (~30 lines)
 │       ├── Square.jsx      # Individual square: highlights, hover, hints (all Tailwind)
 │       ├── PieceSVG.jsx    # Renders cburnett piece SVGs as <img> elements
 │       ├── GameInfo.jsx    # Status panel using shadcn Card/Badge/Button
+│       ├── ChatBox.jsx     # Chat panel: messages, view toggle, thinking indicator
+│       ├── ProviderSelect.jsx  # Provider + model dropdown selectors
+│       ├── ApiKeyInput.jsx     # API key input with save/clear
 │       └── PromotionModal.jsx  # Piece picker using shadcn Dialog
 ```
 
@@ -45,7 +55,7 @@ chess_game/
 
 **Tailwind CSS v4** via `@tailwindcss/vite` — no PostCSS config, no `tailwind.config.js`. The Vite plugin handles everything.
 
-**shadcn/ui** — pre-built accessible components (Card, Button, Badge, Dialog) from `src/components/ui/`. These depend on Radix UI primitives, `clsx`, `tailwind-merge`, and `class-variance-authority`.
+**shadcn/ui** — pre-built accessible components (Card, Button, Badge, Dialog, Input, Select, ScrollArea, Label) from `src/components/ui/`. These depend on Radix UI primitives, `clsx`, `tailwind-merge`, and `class-variance-authority`.
 
 **`cn()` helper** (`src/lib/utils.js`) — merges Tailwind classes with `clsx` + `tailwind-merge`. Used throughout components for conditional class application.
 
@@ -74,6 +84,30 @@ All pure JavaScript — zero React dependency, portable and independently testab
 **`gameState.js`** — `makeMove()` orchestrates a complete turn: calls `applyMove()`, flips the turn, tracks captured pieces, appends to move/position history, then calls `getGameStatus()`. Status detection checks (in order): no legal moves → checkmate or stalemate, 50-move rule (halfMoveClock ≥ 100), threefold repetition (simple string hash of board+turn), insufficient material (K vs K, K+B vs K, K+N vs K, same-color bishops).
 
 **`ai.js`** — The AI opponent for black, running **entirely locally in the browser** — no API calls, no external chess engine (e.g. Stockfish), no server communication. It is ~86 lines of vanilla JavaScript with no dependencies beyond the game's own engine files. `getBestMove()` runs minimax with alpha-beta pruning at depth 3 (~100k positions). The evaluation sums material + piece-square table bonuses (positive favors white). Move ordering sorts captures first for better pruning. The AI always promotes to queen. Computation runs on the browser's main thread, deferred by a 100ms `setTimeout` to keep the UI responsive.
+
+**`notation.js`** — Algebraic notation utilities for the LLM integration. Pure functions with no React dependency:
+- `toSquareName(row, col)` / `fromSquareName(square)` — coordinate ↔ algebraic square conversion (row 0 = rank 8, col 0 = file a)
+- `moveToSAN(gameState, move)` — generates Standard Algebraic Notation for a move, including disambiguation, captures, promotions, check/checkmate suffixes, and castling (`O-O` / `O-O-O`)
+- `sanToMove(gameState, san)` — parses SAN (or UCI like `"e2e4"`) back to a move object by generating SAN for all legal moves and string-matching. Returns `null` if no match.
+- `boardToDescription(gameState)` — rank-by-rank text representation (`K` white, `k` black, `.` empty)
+- `moveHistoryToString(gameState)` — replays the full game from the initial position to produce `"1. e4 e5 2. Nf3 Nc6 ..."` notation
+
+---
+
+### LLM service layer (`src/services/llm/`)
+
+Supports the API game mode where an LLM plays as black. No new npm dependencies — uses native `fetch()` and `localStorage`.
+
+**`apiKeyStore.js`** — Persists per-provider API keys in `localStorage` under key `'chess-rot-api-keys'`. Exports `getApiKey(providerId)`, `setApiKey(providerId, key)`, `clearApiKey(providerId)`.
+
+**`provider.js`** — Provider registry with a `PROVIDERS` map. Currently contains only Anthropic with two models (Haiku 4.5 default, Sonnet 4.5). Each provider has a `sendMessage(apiKey, model, messages, systemPrompt)` async function. The Anthropic implementation calls `fetch('https://api.anthropic.com/v1/messages')` directly from the browser using the `anthropic-dangerous-direct-browser-access: true` header (official CORS pattern). Max tokens: 300. Adding a new provider is just adding another entry to the `PROVIDERS` object.
+
+**`prompt.js`** — System prompt and message construction for the LLM chess opponent:
+- `SYSTEM_PROMPT` — instructs the LLM to play as black, respond with SAN on line 1 + comment on line 3, includes SAN notation rules and examples
+- `buildUserMoveMessage(san, gameState)` — constructs a user message with the player's move, board state, and move history
+- `buildFirstMoveMessage(gameState)` — special message for the game's first move
+- `buildIllegalMoveMessage(attempted, gameState)` — feedback message with the full list of legal moves in SAN
+- `parseLLMResponse(text)` → `{move, comment}` — extracts the move from line 1 and comment from after the first blank line
 
 ---
 
@@ -106,6 +140,26 @@ AI RESPONSE (useEffect on gameState.turn === BLACK):
   → setIsThinking(false)
 ```
 
+### Click → Move → LLM data flow (ApiGame)
+
+```
+Same board click handling as Game.jsx (select piece → execute move)
+
+LLM RESPONSE (useEffect on gameState.turn === BLACK && apiKey set):
+  → setIsThinking(true) → "Thinking..." shown in chat
+  → Convert player's last move to SAN via moveHistoryToString()
+  → Build user message with board description + move history
+  → Add player move + position to chatMessages
+  → Append user message to conversationHistory
+  → Call provider.sendMessage() with full conversation
+  → Parse response → {move, comment}
+  → Validate with sanToMove():
+    → If legal: makeMove(), add move+comment to chat, update conversation
+    → If illegal: send feedback with legal moves list, retry (up to 3x)
+  → If all retries fail: show error in chat
+  → setIsThinking(false)
+```
+
 ---
 
 ### Game state shape
@@ -131,17 +185,18 @@ AI RESPONSE (useEffect on gameState.turn === BLACK):
 
 Uses **react-router-dom** with `BrowserRouter` (wrapped in `main.jsx`). `App.jsx` renders the shared full-screen background container with gradient layers, then `<Routes>` picks the page:
 
-- `/` → `LandingPage` — title screen with "chess rot" and play button
-- `/play` → `Game` — the chess board + info panel (all game state lives here)
+- `/` → `LandingPage` — title screen with "chess rot" and play buttons (local + api)
+- `/play` → `Game` — the chess board + info panel (local minimax AI)
+- `/play/api` → `ApiGame` — the chess board + provider controls + chat panel (LLM API opponent)
 - `*` → redirects to `/` (catch-all for unknown paths)
 
-Navigation uses `<Link to="/play">` from react-router-dom. The shared background (`bg-[#080a0e]` + gradient divs) is rendered once in `App.jsx` so both pages share the same dark canvas.
+Navigation uses `<Link>` from react-router-dom. The shared background (`bg-[#080a0e]` + gradient divs) is rendered once in `App.jsx` so all pages share the same dark canvas.
 
 ---
 
 ### Visual architecture
 
-**Landing page** (`LandingPage.jsx`) — full-screen centered layout over the shared dark background. "chess rot" in `font-ocr` (Share Tech Mono) at `8rem` (responsive: `4rem` tablet, `2.5rem` phone), `uppercase`, `tracking-[0.15em]`, with `-webkit-text-stroke: 2px rgba(255,255,255,0.9)` for a visible letter outline and a faint blue text-shadow glow. Below: a "new game (local)" shadcn `Button variant="outline"` link with glass styling (`bg-white/[0.03] backdrop-blur-sm border-white/[0.08]`), blue glow on hover. Wrapped in a flex column so future options (online play, puzzles) are additional `<Button>` entries.
+**Landing page** (`LandingPage.jsx`) — full-screen centered layout over the shared dark background. "chess rot" in `font-ocr` (Share Tech Mono) at `8rem` (responsive: `4rem` tablet, `2.5rem` phone), `uppercase`, `tracking-[0.15em]`, with `-webkit-text-stroke: 2px rgba(255,255,255,0.9)` for a visible letter outline and a faint blue text-shadow glow. Below: two shadcn `Button variant="outline"` links — "new game (local)" → `/play` and "new game (api)" → `/play/api` — both with glass styling (`bg-white/[0.03] backdrop-blur-sm border-white/[0.08]`), blue glow on hover.
 
 The visual theme is **dark glassmorphism** — semi-transparent cards over a near-black background (`#080a0e`) with two layered radial gradients: a blue-gray ellipse centered near the board (`#1a2332` → `#0d1117` → transparent) and a faint purple accent in the lower-right (`rgba(90,60,150,0.10)`). These color layers give `backdrop-blur` surfaces visible refraction.
 
@@ -210,10 +265,11 @@ Two scripts automate capturing a PNG of the running game and attaching it to a p
 
 ```bash
 node scripts/screenshot.mjs [output-path] [--page <name>]
-# Pages: play (default, /play, waits for .board), landing (/, waits for h1)
+# Pages: play (default, /play, waits for .board), landing (/, waits for h1), api (/play/api, waits for .board)
 # Examples:
 node scripts/screenshot.mjs /tmp/chess-screenshot.png             # game board (default)
 node scripts/screenshot.mjs /tmp/landing.png --page landing       # landing page
+node scripts/screenshot.mjs /tmp/api.png --page api               # API game page
 ```
 
 **`scripts/upload-screenshot.sh`** — Uploads the PNG to a `pr-screenshots` orphan branch on GitHub (via Contents API) and prepends a `## Screenshot` section with the image to the PR body. Creates the orphan branch automatically on first run. Usage:
