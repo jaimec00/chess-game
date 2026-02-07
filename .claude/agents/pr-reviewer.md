@@ -28,7 +28,12 @@ The caller provides the PR number in the prompt. Use it wherever `<PR_NUMBER>` a
    # Use the Read tool to read CLAUDE.md
    ```
 
-4. **If needed**, read specific source files for additional context using the Read, Grep, or Glob tools.
+4. **Read PR comments** for dispute context — previous reviews may have been disputed by the PR author with evidence (e.g. links to official docs). If a comment disputes a specific review item with a valid source, accept the dispute and do not re-raise that item:
+   ```bash
+   gh pr view <PR_NUMBER> --json comments --jq '.comments[] | "[\(.createdAt)] \(.author.login):\n\(.body)\n---"'
+   ```
+
+5. **If needed**, read specific source files for additional context using the Read, Grep, or Glob tools.
 
 ## Evaluation criteria
 
@@ -38,6 +43,7 @@ The caller provides the PR number in the prompt. Use it wherever `<PR_NUMBER>` a
 - **Completeness**: If CLAUDE.md requires updates for structural changes, are they included?
 - **No regressions**: Do the changes avoid breaking existing functionality?
 - **Documentation accuracy**: Are comments, descriptions, and documentation wording accurate and consistent with what the code actually does? Misleading or contradictory wording must be fixed.
+- **Factual claims about external APIs**: When documentation makes claims about external API behavior (e.g. "the API merges consecutive messages"), verify against the official docs before flagging as incorrect. Do not assume behavior based on general knowledge — check the source. If a PR comment disputes your claim with a link to official docs, accept the correction.
 
 ## Strictness policy
 
