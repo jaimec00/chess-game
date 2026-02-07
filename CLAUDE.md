@@ -2,7 +2,7 @@
 
 ### Overview
 
-A complete browser chess game (~1,800 lines) — Player (white) vs AI (black) with full standard rules, built from scratch with React 19 + Vite + Tailwind CSS v4 + shadcn/ui + react-router-dom. No external chess libraries.
+A complete browser chess game (~1,700 lines) — Player (white) vs AI (black) with full standard rules, built from scratch with React 19 + Vite + Tailwind CSS v4 + shadcn/ui + react-router-dom. No external chess libraries.
 
 ```
 chess_game/
@@ -133,6 +133,7 @@ Uses **react-router-dom** with `BrowserRouter` (wrapped in `main.jsx`). `App.jsx
 
 - `/` → `LandingPage` — title screen with "chess rot" and play button
 - `/play` → `Game` — the chess board + info panel (all game state lives here)
+- `*` → redirects to `/` (catch-all for unknown paths)
 
 Navigation uses `<Link to="/play">` from react-router-dom. The shared background (`bg-[#080a0e]` + gradient divs) is rendered once in `App.jsx` so both pages share the same dark canvas.
 
@@ -140,7 +141,7 @@ Navigation uses `<Link to="/play">` from react-router-dom. The shared background
 
 ### Visual architecture
 
-**Landing page** (`LandingPage.jsx`) — full-screen centered layout over the shared dark background. "chess rot" in `font-ocr` (Share Tech Mono) at `8rem` (responsive: `4rem` tablet, `2.5rem` phone), `uppercase`, `tracking-[0.15em]`, with `-webkit-text-stroke: 2px rgba(255,255,255,0.9)` for thickness and a faint blue text-shadow glow. Below: a shadcn `Button variant="outline"` link with glass styling (`bg-white/[0.03] backdrop-blur-sm border-white/[0.08]`), blue glow on hover. Wrapped in a flex column so future options (online play, puzzles) are additional `<Button>` entries.
+**Landing page** (`LandingPage.jsx`) — full-screen centered layout over the shared dark background. "chess rot" in `font-ocr` (Share Tech Mono) at `8rem` (responsive: `4rem` tablet, `2.5rem` phone), `uppercase`, `tracking-[0.15em]`, with `-webkit-text-stroke: 2px rgba(255,255,255,0.9)` for a visible letter outline and a faint blue text-shadow glow. Below: a "new game (local)" shadcn `Button variant="outline"` link with glass styling (`bg-white/[0.03] backdrop-blur-sm border-white/[0.08]`), blue glow on hover. Wrapped in a flex column so future options (online play, puzzles) are additional `<Button>` entries.
 
 The visual theme is **dark glassmorphism** — semi-transparent cards over a near-black background (`#080a0e`) with two layered radial gradients: a blue-gray ellipse centered near the board (`#1a2332` → `#0d1117` → transparent) and a faint purple accent in the lower-right (`rgba(90,60,150,0.10)`). These color layers give `backdrop-blur` surfaces visible refraction.
 
@@ -273,7 +274,7 @@ Custom slash-command skills live in `.claude/skills/<name>/SKILL.md`.
 
 **`/merge-prs`** — Reviews and merges open PRs into master in creation order. Each PR review is **delegated to the `pr-reviewer` sub-agent** so it runs in a fresh context window — this prevents the review from being influenced by prior conversation context where the code was written. Based on the sub-agent's verdict, the skill approves and merges the PR or requests changes and skips it. Resolves merge conflicts when they arise. After every merge it pulls from origin to keep local and remote in sync. Accepts optional PR numbers as arguments (e.g. `/merge-prs 5,7,9`).
 
-**`/pr-screenshot`** — Captures a screenshot of the running game and attaches it to a PR. Usage: `/pr-screenshot <pr-number> [source-dir]`. Builds the app from the source directory (defaults to main repo), launches headless Brave to take a 2x PNG, uploads it to the `pr-screenshots` orphan branch via the GitHub Contents API, and prepends a `## Screenshot` section to the PR body. Handles worktree `node_modules` symlinking and uses `upload-screenshot.sh` for uploading and PR body updates (including auto-fixing `\!` escaping). Call this skill after creating any PR that touches UI files (`src/components/**`, `src/App.jsx`, `src/index.css`, `src/assets/**`, `index.html`).
+**`/pr-screenshot`** — Captures a screenshot of the running game and attaches it to a PR. Usage: `/pr-screenshot <pr-number> [source-dir] [--page <name>]`. Builds the app from the source directory (defaults to main repo), launches headless Brave to take a 2x PNG of the specified page (`play` default, or `landing`), uploads it to the `pr-screenshots` orphan branch via the GitHub Contents API, and prepends a `## Screenshot` section to the PR body. Handles worktree `node_modules` symlinking and uses `upload-screenshot.sh` for uploading and PR body updates (including auto-fixing `\!` escaping). Call this skill after creating any PR that touches UI files (`src/components/**`, `src/App.jsx`, `src/index.css`, `src/assets/**`, `index.html`).
 
 ---
 
