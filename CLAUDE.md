@@ -29,8 +29,8 @@ chess_game/
 │   │   └── ai.js           # Minimax + alpha-beta pruning (depth 3), positional evaluation
 │   └── components/
 │       ├── ui/             # shadcn/ui primitives (Card, Button, Badge, Dialog)
-│       ├── Board.jsx       # 3D perspective board with glass frame, coordinates
-│       ├── Board.css       # Minimal CSS for 3D transforms + grid sizing (~48 lines)
+│       ├── Board.jsx       # Board with glass frame, coordinates
+│       ├── Board.css       # Grid sizing + responsive media queries (~30 lines)
 │       ├── Square.jsx      # Individual square: highlights, hover, hints (all Tailwind)
 │       ├── PieceSVG.jsx    # Renders cburnett piece SVGs as <img> elements
 │       ├── GameInfo.jsx    # Status panel using shadcn Card/Badge/Button
@@ -49,9 +49,9 @@ chess_game/
 
 **`src/index.css`** — Tailwind entry point. Contains:
 - `@import "tailwindcss"` + shadcn imports
-- `@theme inline { ... }` with custom tokens: board square colors (`sq-light`, `sq-dark`, etc.), accent gold, font families (`font-display`, `font-body`, `font-ocr`), custom animations (`check-throb`, `dots-pulse`)
-- `:root` CSS variables for the dark color scheme (black background)
-- `@keyframes` for check-throb and dots-pulse animations
+- `@theme inline { ... }` with custom tokens: board square colors (`sq-light`, `sq-dark`, etc.), accent gold, font families (`font-display`, `font-body`, `font-ocr`), custom animations (`check-throb`, `dots-pulse`, `shimmer`)
+- `:root` CSS variables for the dark color scheme
+- `@keyframes` for check-throb, dots-pulse, and shimmer animations
 
 **Board.css** is the only remaining custom CSS file (~30 lines), used for things Tailwind can't express: CSS custom property `--board-size` with responsive media query overrides, grid layout for the board.
 
@@ -127,15 +127,15 @@ AI RESPONSE (useEffect on gameState.turn === BLACK):
 
 ### Visual architecture
 
-The visual theme is **dark minimal** — semi-transparent cards, a black background with a subtle radial gradient (dark gray centered on the board, fading to black).
+The visual theme is **dark glassmorphism** — semi-transparent cards over a near-black background (`#080a0e`) with two layered radial gradients: a blue-gray ellipse centered near the board (`#1a2332` → `#0d1117` → transparent) and a faint purple accent in the lower-right (`rgba(90,60,150,0.10)`). These color layers give `backdrop-blur` surfaces visible refraction.
 
-The board is **flat 2D** — no perspective tilt or 3D transforms. The board frame uses a subtle border (`bg-white/[0.06] border border-white/10`).
+The board is **flat 2D** — no perspective tilt or 3D transforms. The board frame is a glass surface (`bg-white/[0.08] backdrop-blur-xl border border-white/10 rounded-lg`) with a blue outer glow shadow and a top-edge shimmer highlight (`animate-shimmer`, 8s slow opacity pulse).
 
-Board squares use **black and gray tones** (`bg-sq-light` #a0a0a0 / `bg-sq-dark` #2a2a2a) defined as Tailwind theme tokens. Selection, last-move, and check highlights are applied via conditional Tailwind classes with `cn()`. Board coordinate labels (ranks/files) use `font-ocr` (Share Tech Mono) at 12px with `text-white/70` for clear visibility.
+Board squares use **cool blue-gray tones** (`bg-sq-light` #8e96a0 / `bg-sq-dark` #262a30) defined as Tailwind theme tokens. Selection adds a green-tinted inner glow alongside the dark inset shadow. Legal move hint dots use `backdrop-blur-[2px]` for a frosted glass effect. Board coordinate labels (ranks/files) use `font-ocr` (Share Tech Mono) at 12px with `text-white/60`.
 
 Pieces use the **cburnett SVG set** (`src/assets/pieces/`), the standard piece artwork from lichess.org (CC BY-SA 3.0 by Colin M.L. Burnett). `PieceSVG.jsx` imports all 12 SVGs and renders them as `<img>` elements. Tailwind `drop-shadow` utilities on the piece wrapper cast shadows onto the board.
 
-The info panel uses shadcn **Card** with glassmorphism (`bg-white/[0.05] backdrop-blur-xl border-white/10`), **Share Tech Mono** (`font-ocr`) for all text, and gold accent color for the title. The promotion modal uses shadcn **Dialog** for accessible overlay with focus trapping.
+The info panel uses shadcn **Card** with deep glassmorphism (`bg-white/[0.05] backdrop-blur-2xl`), gradient-faded dividers, **Share Tech Mono** (`font-ocr`) for all text, and gold accent color for the title. The New Game button has `backdrop-blur-sm` with a subtle blue glow on hover. The promotion modal uses shadcn **Dialog** with `backdrop-blur-3xl`, a brighter border (`white/[0.14]`), blue outer glow, and gold hover glow on piece buttons. The dialog overlay adds `backdrop-blur-sm` for soft background blur (customized from vendored shadcn component).
 
 ---
 
