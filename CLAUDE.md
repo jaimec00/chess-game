@@ -104,8 +104,8 @@ Supports the API game mode where an LLM plays as black. No new npm dependencies 
 
 **`prompt.js`** — System prompt and message construction for the LLM chess opponent:
 - `SYSTEM_PROMPT` — instructs the LLM to play as black, respond with SAN on line 1 + comment on line 3, includes SAN notation rules, examples, and board state format description
-- `buildUserMoveMessage(san, boardDescription)` — constructs a user message with the player's move and current board state
-- `buildFirstMoveMessage(san, boardDescription)` — special message for the game's first move with the player's opening move and board state
+- `buildUserMoveMessage(san)` — constructs a user message with only the player's move (e.g. "My move: e4")
+- `buildFirstMoveMessage(san)` — special message for the game's first move with the player's opening move
 - `buildIllegalMoveMessage(attempted)` — simple feedback that the move was illegal, asks for a different one
 - `parseLLMResponse(text)` → `{move, comment}` — extracts the move from line 1 and comment from after the first blank line
 
@@ -148,11 +148,12 @@ Same board click handling as Game.jsx (select piece → execute move)
 LLM RESPONSE (useEffect on gameState.turn === BLACK && apiKey set):
   → setIsThinking(true) → "Thinking..." shown in chat
   → Convert player's last move to SAN via moveHistoryToString()
+  → Build user message with the move (no board state)
   → Generate current board state via boardToDescription()
-  → Build user message with the move + current board state (not repeated from prior turns)
+  → Build API-only copy of conversation with board state appended to last user message
+  → Store plain conversation (without board state) in conversationHistory
   → Add player move to chatMessages
-  → Append user message to conversationHistory
-  → Call provider.sendMessage() with full conversation
+  → Call provider.sendMessage() with API conversation (only current board state included)
   → Parse response → {move, comment}
   → Validate with sanToMove():
     → If legal: makeMove(), add move+comment to chat, update conversation

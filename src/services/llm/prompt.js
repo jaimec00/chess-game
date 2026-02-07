@@ -31,12 +31,12 @@ IMPORTANT:
 - If told your move was illegal, pick a DIFFERENT move.
 - Never repeat an illegal move you already tried.`;
 
-export function buildUserMoveMessage(san, boardDescription) {
-  return `My move: ${san}\n\nBoard:\n${boardDescription}`;
+export function buildUserMoveMessage(san) {
+  return `My move: ${san}`;
 }
 
-export function buildFirstMoveMessage(san, boardDescription) {
-  return `The game just started. My first move: ${san}. Your turn.\n\nBoard:\n${boardDescription}`;
+export function buildFirstMoveMessage(san) {
+  return `The game just started. My first move: ${san}. Your turn.`;
 }
 
 export function buildIllegalMoveMessage(attempted) {
