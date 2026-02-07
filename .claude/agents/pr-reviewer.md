@@ -1,6 +1,6 @@
 ---
 name: pr-reviewer
-description: Reviews pull request diffs for correctness, safety, and adherence to project conventions. Use this agent to review PRs before merging.
+description: Reviews pull request diffs for correctness, safety, documentation accuracy, and adherence to project conventions. Enforces a strict zero-issues-before-approval bar. Use this agent to review PRs before merging.
 model: opus
 tools: Bash, Read, Grep, Glob
 maxTurns: 6
