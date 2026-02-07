@@ -111,6 +111,46 @@ Supports the API game mode where an LLM plays as black. No new npm dependencies 
 
 ---
 
+### Anthropic Messages API reference
+
+The LLM game mode calls the Anthropic Messages API (`POST https://api.anthropic.com/v1/messages`) directly from the browser. Key facts about how this API works:
+
+**Stateless** — the API has no server-side session or memory. Every request must include the **full conversation history** in the `messages` array. The client (`ApiGame.jsx`) maintains a `conversationHistoryRef` that accumulates all messages and sends the entire array on each turn. This means input token usage grows linearly with game length — every prior move's message is re-sent on every API call.
+
+**Board state handling** — to give the LLM positional awareness without bloating token usage, the current board state (`boardToDescription()` output) is appended only to the **last user message** at send time. It is NOT stored in `conversationHistoryRef`, so previous board states are never re-sent. The LLM sees only the current board position, plus the plain move text from all prior turns.
+
+**Request format:**
+```json
+{
+  "model": "claude-haiku-4-5-20251001",
+  "max_tokens": 300,
+  "system": "You are playing chess as Black...",
+  "messages": [
+    {"role": "user", "content": "The game just started. My first move: e4. Your turn.\n\nBoard:\n8: r n b q k b n r\n..."},
+    {"role": "assistant", "content": "e5\n\nClassic opening."},
+    {"role": "user", "content": "My move: Nf3\n\nBoard:\n8: r n b q k b n r\n..."}
+  ]
+}
+```
+
+**Required headers:** `x-api-key` (the user's API key), `anthropic-version: 2023-06-01` (API version, still current), `content-type: application/json`, `anthropic-dangerous-direct-browser-access: true` (enables CORS for browser `fetch()`; without this header, browser requests are blocked by CORS policy).
+
+**Required body params:** `model` (string, e.g. `"claude-haiku-4-5-20251001"`), `messages` (array of `{role, content}` objects), `max_tokens` (number, hard cap on response tokens — we use 300).
+
+**Optional body params we use:** `system` (string — the system prompt; passed as a top-level param, NOT as a message with role "system").
+
+**Message role rules:** messages must alternate between `"user"` and `"assistant"` roles. Consecutive same-role messages are automatically merged by the API. The first message must be `"user"`. There is no `"system"` role — use the top-level `system` param instead.
+
+**Response format:** `{ id, type: "message", role: "assistant", content: [{type: "text", text: "..."}], stop_reason, usage: {input_tokens, output_tokens} }`. We extract `content[0].text`.
+
+**Stop reasons:** `"end_turn"` (natural stop), `"max_tokens"` (hit the cap), `"stop_sequence"` (matched a custom stop string). If we get `"max_tokens"`, the response may be truncated mid-sentence.
+
+**CORS / browser access:** the `anthropic-dangerous-direct-browser-access: true` header is an official Anthropic feature that enables CORS on their API. The "dangerous" name is intentional — it warns that embedding an API key in client code exposes it. This is acceptable for our "bring your own key" pattern where the user supplies their own key. Without this header, browser `fetch()` calls to `api.anthropic.com` fail with a CORS error.
+
+**Token costs (2026 pricing):** Haiku 4.5: $1/$5 per million input/output tokens. Sonnet 4.5: $3/$15. A typical chess game (30 moves) with our prompt format uses roughly 10-20K input tokens total across all API calls due to the growing conversation history.
+
+---
+
 ### Click → Move → AI data flow
 
 ```
