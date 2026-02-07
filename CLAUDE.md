@@ -190,9 +190,18 @@ The project lives inside `~/Desktop/chess_game_workspace/chess_game`. The parent
 
 ---
 
+### Skills (`.claude/skills/`)
+
+Custom slash-command skills live in `.claude/skills/<name>/SKILL.md`.
+
+**`/merge-prs`** — Reviews and merges open PRs into master in creation order. For each PR it reads the diff, approves and merges if it looks good, or requests changes and skips if not. Resolves merge conflicts when they arise. After every merge it pulls from origin to keep local and remote in sync. Accepts optional PR numbers as arguments (e.g. `/merge-prs 5,7,9`).
+
+---
+
 ### Tips & gotchas
 
 - **`gh pr edit` is broken** — the `gh` CLI (as of early 2026) returns exit code 1 on `gh pr edit` due to a deprecated Projects Classic GraphQL field, even though the underlying mutation sometimes succeeds. Use the REST API instead: `gh api repos/OWNER/REPO/pulls/N -X PATCH --input payload.json`.
 - **Large payloads via `gh api`** — passing large values (e.g. base64-encoded images) through `-f "field=VALUE"` will fail with "Argument list too long". Write the JSON body to a temp file and use `--input file.json` instead.
 - **Shell CWD + worktree removal** — if your shell's CWD is inside a worktree directory and that directory gets removed, all subsequent shell commands will fail. Always `cd` back to the main repo before removing a worktree.
 - **Brave headless** — Brave is installed at `/usr/bin/brave-browser` and works as a Chromium drop-in for puppeteer-core. Use `--no-sandbox --disable-setuid-sandbox --disable-gpu --disable-extensions` flags for headless screenshots.
+- **Always pull after merging PRs** — after merging a PR (via `gh pr merge` or manually), always run `git fetch origin master && git pull origin master` to keep local master in sync with remote. This prevents conflicts and stale state when merging subsequent PRs.
