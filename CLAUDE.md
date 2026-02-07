@@ -126,7 +126,7 @@ The LLM game mode calls the Anthropic Messages API (`POST https://api.anthropic.
   "max_tokens": 300,
   "system": "You are playing chess as Black...",
   "messages": [
-    {"role": "user", "content": "The game just started. My first move: e4. Your turn.\n\nBoard:\n8: r n b q k b n r\n..."},
+    {"role": "user", "content": "The game just started. My first move: e4. Your turn."},
     {"role": "assistant", "content": "e5\n\nClassic opening."},
     {"role": "user", "content": "My move: Nf3\n\nBoard:\n8: r n b q k b n r\n..."}
   ]

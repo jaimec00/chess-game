@@ -24,7 +24,7 @@ Nf6+
 Your king looks a little nervous. Good.
 
 BOARD STATE:
-Each message includes the current board position. The board is shown rank by rank (8 down to 1).
+Your opponent's latest move message includes the current board position. The board is shown rank by rank (8 down to 1).
 Uppercase = White pieces (K Q R B N P), lowercase = Black pieces (k q r b n p), dots = empty squares.
 
 IMPORTANT:
