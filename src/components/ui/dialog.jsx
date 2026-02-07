@@ -37,7 +37,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        // customized: added backdrop-blur-sm (not in default shadcn — will be lost on regeneration)
+        // customized: added backdrop-blur-sm for soft background blur behind modals (not in default shadcn — will be lost on regeneration)
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50 backdrop-blur-sm",
         className
       )}

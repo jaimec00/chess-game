@@ -7,7 +7,7 @@ export default function Square({ row, col, piece, isSelected, isLegalMove, isLas
   return (
     <div
       className={cn(
-        'w-full aspect-square flex items-center justify-center relative cursor-pointer select-none transition-all duration-150 group',
+        'w-full aspect-square flex items-center justify-center relative cursor-pointer select-none transition-[background-color,box-shadow] duration-150 group',
         isDark ? 'bg-sq-dark' : 'bg-sq-light',
         isLastMove && (isDark ? '!bg-sq-lastmove-dark' : '!bg-sq-lastmove-light'),
         isSelected && '!bg-sq-selected shadow-[inset_0_0_14px_rgba(0,0,0,0.2),inset_0_0_20px_rgba(80,140,60,0.15)]',

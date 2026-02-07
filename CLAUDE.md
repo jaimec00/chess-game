@@ -30,7 +30,7 @@ chess_game/
 │   └── components/
 │       ├── ui/             # shadcn/ui primitives (Card, Button, Badge, Dialog)
 │       ├── Board.jsx       # Board with glass frame, coordinates
-│       ├── Board.css       # Grid sizing + responsive media queries (~30 lines)
+│       ├── Board.css       # Grid sizing, inner shadow + responsive media queries (~30 lines)
 │       ├── Square.jsx      # Individual square: highlights, hover, hints (all Tailwind)
 │       ├── PieceSVG.jsx    # Renders cburnett piece SVGs as <img> elements
 │       ├── GameInfo.jsx    # Status panel using shadcn Card/Badge/Button
@@ -50,7 +50,7 @@ chess_game/
 **`src/index.css`** — Tailwind entry point. Contains:
 - `@import "tailwindcss"` + shadcn imports
 - `@theme inline { ... }` with custom tokens: board square colors (`sq-light`, `sq-dark`, etc.), accent gold, font families (`font-display`, `font-body`, `font-ocr`), custom animations (`check-throb`, `dots-pulse`, `shimmer`)
-- `:root` CSS variables for the dark color scheme
+- `:root` CSS variables for the dark color scheme (`--background: #000000`; visible page background is `#080a0e` set in App.jsx)
 - `@keyframes` for check-throb, dots-pulse, and shimmer animations
 
 **Board.css** is the only remaining custom CSS file (~30 lines), used for things Tailwind can't express: CSS custom property `--board-size` with responsive media query overrides, grid layout for the board.
