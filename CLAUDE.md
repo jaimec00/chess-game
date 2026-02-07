@@ -29,7 +29,7 @@ chess_game/
 │   │   └── ai.js           # Minimax + alpha-beta pruning (depth 3), positional evaluation
 │   └── components/
 │       ├── ui/             # shadcn/ui primitives (Card, Button, Badge, Dialog)
-│       ├── LandingPage.jsx # "/" route — "chess rot" title + nav buttons
+│       ├── LandingPage.jsx # "/" route — "chess rot" title + play button
 │       ├── Game.jsx        # "/play" route — game state, handlers, board + info panel
 │       ├── Board.jsx       # Board with glass frame, coordinates
 │       ├── Board.css       # Grid sizing, inner shadow + responsive media queries (~30 lines)
@@ -131,7 +131,7 @@ AI RESPONSE (useEffect on gameState.turn === BLACK):
 
 Uses **react-router-dom** with `BrowserRouter` (wrapped in `main.jsx`). `App.jsx` renders the shared full-screen background container with gradient layers, then `<Routes>` picks the page:
 
-- `/` → `LandingPage` — title screen with "chess rot" and navigation buttons
+- `/` → `LandingPage` — title screen with "chess rot" and play button
 - `/play` → `Game` — the chess board + info panel (all game state lives here)
 
 Navigation uses `<Link to="/play">` from react-router-dom. The shared background (`bg-[#080a0e]` + gradient divs) is rendered once in `App.jsx` so both pages share the same dark canvas.
@@ -140,7 +140,7 @@ Navigation uses `<Link to="/play">` from react-router-dom. The shared background
 
 ### Visual architecture
 
-**Landing page** (`LandingPage.jsx`) — full-screen centered layout over the shared dark background. "chess rot" in `font-ocr` (Share Tech Mono) at `8rem` (responsive: `4rem` tablet, `2.5rem` phone), `uppercase`, `tracking-[0.15em]`, with `-webkit-text-stroke: 2px` for thickness and a faint blue text-shadow glow. Below: a flex column of shadcn `Button variant="outline"` links with glass styling (`bg-white/[0.03] backdrop-blur-sm border-white/[0.08]`), blue glow on hover. Structured as a button group so future options (online play, puzzles) are just additional `<Button>` entries.
+**Landing page** (`LandingPage.jsx`) — full-screen centered layout over the shared dark background. "chess rot" in `font-ocr` (Share Tech Mono) at `8rem` (responsive: `4rem` tablet, `2.5rem` phone), `uppercase`, `tracking-[0.15em]`, with `-webkit-text-stroke: 2px rgba(255,255,255,0.9)` for thickness and a faint blue text-shadow glow. Below: a flex column of shadcn `Button variant="outline"` links with glass styling (`bg-white/[0.03] backdrop-blur-sm border-white/[0.08]`), blue glow on hover. Structured as a button group so future options (online play, puzzles) are just additional `<Button>` entries.
 
 The visual theme is **dark glassmorphism** — semi-transparent cards over a near-black background (`#080a0e`) with two layered radial gradients: a blue-gray ellipse centered near the board (`#1a2332` → `#0d1117` → transparent) and a faint purple accent in the lower-right (`rgba(90,60,150,0.10)`). These color layers give `backdrop-blur` surfaces visible refraction.
 
