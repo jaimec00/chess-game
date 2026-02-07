@@ -15,7 +15,7 @@ export default function PromotionModal({ color, onSelect }) {
         onEscapeKeyDown={e => e.preventDefault()}
       >
         <DialogHeader className="items-center">
-          <DialogTitle className="font-display text-base font-semibold tracking-[1.5px] uppercase text-gold">
+          <DialogTitle className="font-ocr text-base font-bold tracking-[1.5px] uppercase text-gold">
             Promote pawn to:
           </DialogTitle>
         </DialogHeader>
@@ -30,7 +30,7 @@ export default function PromotionModal({ color, onSelect }) {
               <span className="w-13 h-13 flex items-center justify-center drop-shadow-[0_2px_3px_rgba(0,0,0,0.5)]">
                 <PieceSVG type={type} color={color} />
               </span>
-              <span className="text-[10px] uppercase tracking-[1px] text-muted-foreground font-semibold">{type}</span>
+              <span className="text-[10px] uppercase tracking-[1px] text-muted-foreground font-ocr font-bold">{type}</span>
             </Button>
           ))}
         </div>
